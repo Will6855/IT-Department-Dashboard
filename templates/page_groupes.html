@@ -1,0 +1,231 @@
+{# region Calcul de variable #}
+    {% set apprenant_sum = df_group_data.query("`jobTitle`.str.startswith('Appren') and `Is Deleted` == False")|length %}
+    {% set formateur_sum = df_group_data.query("`jobTitle`.str.startswith('Format') and `Is Deleted` == False")|length %}
+    {% set vide_sum = df_group_data.query("`jobTitle` == '' and `Is Deleted` == False")|length %}
+    {% set reste_sum = df_group_data[df_group_data["Is Deleted"] == False]|length - (apprenant_sum + formateur_sum + vide_sum) %}
+
+    {% set noProprio_sum = df_group_data.query("`Owner Principal Name` == '' and `Is Deleted` == False")|length %}
+    {% set noMembre_sum = df_group_data.query("`Member Count` == 0 and `Is Deleted` == False")|length %}
+    {% set noAct_sum = df_group_data.query("`Last Activity Date` == '' and `Is Deleted` == False")|length %}
+
+    {% set df_filtered_data = df_group_data.query("`jobTitle`.str.startswith('Appren') and `Is Deleted` == False") %}
+    {% set df_filtered_data = df_filtered_data.assign(Last_Activity_Year=df_filtered_data['Last Activity Date'].str.slice(stop=4)) %}
+    {% set df_apprenantGraphAnomalie = df_filtered_data.groupby('Last_Activity_Year').size() %}
+    {% set df_apprenantGraphAnomalie = df_apprenantGraphAnomalie.rename({"" : "(Vide)"}) %}
+
+    {% set df_filtered_data = df_group_data.query("`jobTitle`.str.startswith('Format') and `Is Deleted` == False") %}
+    {% set df_filtered_data = df_filtered_data.assign(Last_Activity_Year=df_filtered_data['Last Activity Date'].str.slice(stop=4)) %}
+    {% set df_formateurGraphAnomalie = df_filtered_data.groupby('Last_Activity_Year').size() %}
+    {% set df_formateurGraphAnomalie = df_formateurGraphAnomalie.rename({"" : "(Vide)"}) %}
+
+    {% set df_filtered_data = df_group_data.query("~(`jobTitle`.str.startswith('Format') or `jobTitle`.str.startswith('Appren')) and `Is Deleted` == False") %}
+    {% set df_filtered_data = df_filtered_data.assign(Last_Activity_Year=df_filtered_data['Last Activity Date'].str.slice(stop=4)) %}
+    {% set df_resteGraphAnomalie = df_filtered_data.groupby('Last_Activity_Year').size() %}
+    {% set df_resteGraphAnomalie = df_resteGraphAnomalie.rename({"" : "(Vide)"}) %}
+
+    {% set df_filtered_data = df_group_data.query("`Is Deleted` == False").explode('owners.userPrincipalNames') %}
+    {% set df_filtered_data = df_filtered_data[["owners.userPrincipalNames"]] %}
+    {% set df_data = df_filtered_data.merge(df_user_data, left_on="owners.userPrincipalNames", right_on="userPrincipalName") %}
+
+    {% set df_apprenantTop10PoleFormation = df_data.query("`jobTitle`.str.startswith('Appren') and `userPrincipalName`.str.contains('formation-industries-ese')").groupby('displayName').size().reset_index(name='size').sort_values(by='size', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_formateurTop10PoleFormation = df_data.query("`jobTitle`.str.startswith('Format') and `userPrincipalName`.str.contains('formation-industries-ese')").groupby('displayName').size().reset_index(name='size').sort_values(by='size', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_resteTop10PoleFormation = df_data.query("~(`jobTitle`.str.startswith('Format') or `jobTitle`.str.startswith('Appren')) and `userPrincipalName`.str.contains('formation-industries-ese')").groupby('displayName').size().reset_index(name='size').sort_values(by='size', ascending=False).reset_index(drop=True).head(10) %}
+
+    {% set df_apprenantTop10ITII = df_data.query("`jobTitle`.str.startswith('Appren') and `userPrincipalName`.str.contains('itii-normandie')").groupby('displayName').size().reset_index(name='size').sort_values(by='size', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_formateurTop10ITII = df_data.query("`jobTitle`.str.startswith('Format') and `userPrincipalName`.str.contains('itii-normandie')").groupby('displayName').size().reset_index(name='size').sort_values(by='size', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_resteTop10ITII = df_data.query("~(`jobTitle`.str.startswith('Format') or `jobTitle`.str.startswith('Appren')) and `userPrincipalName`.str.contains('itii-normandie')").groupby('displayName').size().reset_index(name='size').sort_values(by='size', ascending=False).reset_index(drop=True).head(10) %}
+{# endregion #}
+
+{% block variable %}
+        <script>
+
+            var groupesXproprio_counts = [{{ apprenant_sum }},{{ formateur_sum }},{{ vide_sum }},{{ reste_sum }}]
+            var groupesXproprio_labels = ["Apprenant","Formateur","(Vide)","Reste"]
+
+            var anomalie_counts = [{{ noProprio_sum }},{{ noMembre_sum }},{{ noAct_sum }}]
+            var anomalie_labels = ["Sans propriétaire", "Sans membres", "Sans date d'activité"]
+
+            var apprenantGraphAnomalie_counts = {{ df_apprenantGraphAnomalie.tolist()|safe }};
+            var apprenantGraphAnomalie_date = {{ df_apprenantGraphAnomalie.index.tolist()|safe }};
+
+            var formateurGraphAnomalie_counts = {{ df_formateurGraphAnomalie.tolist()|safe }};
+            var formateurGraphAnomalie_date = {{ df_formateurGraphAnomalie.index.tolist()|safe }};
+
+            var resteGraphAnomalie_counts = {{ df_resteGraphAnomalie.tolist()|safe }};
+            var resteGraphAnomalie_date = {{ df_resteGraphAnomalie.index.tolist()|safe }};
+
+
+
+            var apprenantTop10PoleFormation_names = {{ df_apprenantTop10PoleFormation['displayName'].tolist()|safe }};
+            var apprenantTop10PoleFormation_counts = {{ df_apprenantTop10PoleFormation['size'].tolist()|safe }};
+            var formateurTop10PoleFormation_names = {{ df_formateurTop10PoleFormation['displayName'].tolist()|safe }};
+            var formateurTop10PoleFormation_counts = {{ df_formateurTop10PoleFormation['size'].tolist()|safe }};
+            var resteTop10PoleFormation_names = {{ df_resteTop10PoleFormation['displayName'].tolist()|safe }};
+            var resteTop10PoleFormation_counts = {{ df_resteTop10PoleFormation['size'].tolist()|safe }};
+            
+            var apprenantTop10ITII_names = {{ df_apprenantTop10ITII['displayName'].tolist()|safe }};
+            var apprenantTop10ITII_counts = {{ df_apprenantTop10ITII['size'].tolist()|safe }};
+            var formateurTop10ITII_names = {{ df_formateurTop10ITII['displayName'].tolist()|safe }};
+            var formateurTop10ITII_counts = {{ df_formateurTop10ITII['size'].tolist()|safe }};
+            var resteTop10ITII_names = {{ df_resteTop10ITII['displayName'].tolist()|safe }};
+            var resteTop10ITII_counts = {{ df_resteTop10ITII['size'].tolist()|safe }};
+        </script>
+{% endblock %}
+
+        <a href="/groupUpdate" class="reloadButton btn btn-outline-dark" ><i class="fa-solid fa-rotate-right"></i></a>
+        Dernière MàJ: {{ groupLastUpdate }}
+        <div class="row">
+            <div class="col-xxl-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fa-solid fa-user-group"></i>
+                                Groupe par Fonction du Propriétaire Principal
+                            </diV>
+                            <div class="card-body" style="display: flex">
+                                <div class="chart-wrapper">
+                                    <canvas id="groupesXproprio"></canvas>
+                                </div>
+                                <div class="infoGraph">
+                                <div>
+                                    <b>Apprenant:</b>
+                                    <span style="float: right; padding-left: 25px;">{{ apprenant_sum }} groupe(s)</span><br>
+                                    <b>Formateur:</b> 
+                                    <span style="float: right; padding-left: 25px;">{{ formateur_sum }} groupe(s)</span><br>
+                                    <b>(Vide):</b>
+                                    <span style="float: right; padding-left: 25px;">{{ vide_sum }} groupe(s)</span><br>
+                                    <b>Reste:</b>
+                                    <span style="float: right; padding-left: 25px;">{{ reste_sum }} groupe(s)</span>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                Anomalies
+                            </diV>
+                            <div class="card-body" style="display: flex">
+                                <div class="chart-wrapper">
+                                    <canvas id="anomalie"></canvas>
+                                </div>
+                                <div class="infoGraph">
+                                <div>
+                                    <b>Sans propriétaire:</b> 
+                                    <span style="float: right; padding-left: 25px;">{{ noProprio_sum }} groupe(s)</span><br>
+                                    <b>Sans membre:</b> 
+                                    <span style="float: right; padding-left: 25px;">{{ noMembre_sum }} groupe(s)</span><br>
+                                    <b>Sans date d'activité:</b>
+                                    <span style="float: right; padding-left: 25px;">{{ noAct_sum }} groupe(s)</span>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-6">
+                <ul class="nav nav-tabs" id="tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active show" data-bs-toggle="tab" href="#apprenantGroupes" data-bs-target=".apprenantGroupes">Apprenant</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#formateurGroupes" data-bs-target=".formateurGroupes">Formateur</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#resteGroupes" data-bs-target=".resteGroupes">Reste</a>
+                    </li>
+                </ul>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                <i class="fa-solid fa-calendar-week"></i>
+                                    Dernière Activité
+                                </div>
+                                <div class="card-body" style="display: flex">
+                                    <div class="chart-wrapper">
+                                        <div class="tab-pane fade show active apprenantGroupes">
+                                            <canvas id="apprenantGraphAnomalie"></canvas>
+                                        </div>
+                                        <div class="tab-pane fade formateurGroupes">
+                                            <canvas id="formateurGraphAnomalie"></canvas>
+                                        </div>
+                                        <div class="tab-pane fade resteGroupes">
+                                            <canvas id="resteGraphAnomalie"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="infoGraph">
+                                        <div class="tab-pane fade show active apprenantGroupes">
+                                            {% for index in range(df_apprenantGraphAnomalie|length) %}
+                                            <b>{{ df_apprenantGraphAnomalie.index[index] }}:</b> 
+                                            <span style="float: right; padding-left: 25px;">{{ df_apprenantGraphAnomalie[index] }} groupe(s)</span><br>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="tab-pane fade formateurGroupes">
+                                            {% for index in range(df_formateurGraphAnomalie|length) %}
+                                            <b>{{ df_formateurGraphAnomalie.index[index] }}:</b> 
+                                            <span style="float: right; padding-left: 25px;">{{ df_formateurGraphAnomalie[index] }} groupe(s)</span><br>
+                                            {% endfor %}
+                                        </diV>
+                                        <div class="tab-pane fade resteGroupes">
+                                            {% for index in range(df_resteGraphAnomalie|length) %}
+                                            <b>{{ df_resteGraphAnomalie.index[index] }}:</b> 
+                                            <span style="float: right; padding-left: 25px;">{{ df_resteGraphAnomalie[index] }} groupe(s)</span><br>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xxl-6">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                        <i class="fa-solid fa-ranking-star"></i>
+                                            Top 10 propriétaires (Pôle Formation)
+                                        </div>
+                                        <div class="card-body" style="display: flex">
+                                            <div class="bar-chart-wrapper">
+                                                <div class="tab-pane fade show active apprenantGroupes">
+                                                    <canvas id="apprenantTop10PoleFormation"></canvas>
+                                                </div>
+                                                <div class="tab-pane fade formateurGroupes">
+                                                    <canvas id="formateurTop10PoleFormation"></canvas>
+                                                </diV>
+                                                <div class="tab-pane fade resteGroupes">
+                                                    <canvas id="resteTop10PoleFormation"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xxl-6">
+                                    <div class="card mb-4">
+                                        <div class="card-header">
+                                        <i class="fa-solid fa-ranking-star"></i>
+                                            Top 10 propriétaires (ITII Normandie)
+                                        </div>
+                                        <div class="card-body" style="display: flex">
+                                            <div class="bar-chart-wrapper">
+                                                <div class="tab-pane fade show active apprenantGroupes">
+                                                    <canvas id="apprenantTop10ITII"></canvas>
+                                                </div>
+                                                <div class="tab-pane fade formateurGroupes">
+                                                    <canvas id="formateurTop10ITII"></canvas>
+                                                </diV>
+                                                <div class="tab-pane fade resteGroupes">
+                                                    <canvas id="resteTop10ITII"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>

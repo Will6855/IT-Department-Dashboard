@@ -1,0 +1,729 @@
+{% extends 'base.html' %}
+
+{% set month = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Décembre'] %}
+
+{% block javascript %}
+        <script>
+            DEFAULT_COLORS = [
+                                "#f38b4a",
+                                "#56d798",
+                                "#ff8397",
+                                "#6970d5",
+                                "#d5d569",
+                                "#d56969",
+                                "#69d1d5" 
+                                ]
+                //["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#7FDBFF", "#B10DC9", "#FFDC00", "#001f3f", "#39CCCC", "#01FF70", "#85144b", "#F012BE", "#3D9970", "#111111", "#AAAAAA"]
+            //
+            moment.locale('fr-FR');
+
+            var data = {
+                datasets: [
+                {% for index in range(df_datasets_absences|length) %}
+                    {
+                        categoryPercentage: 1,
+                        barPercentage: 1,
+                        backgroundColor: DEFAULT_COLORS,
+                        // backgroundColor: DEFAULT_COLORS[{{ loop.index0 }}],
+                        data: {{ df_datasets_absences.loc[index].tolist() }},
+                        label: "Absence"
+                    },
+                {% endfor %}
+                ],
+                labels: ["MFL", "IEL", "PEL", "LCL", "KLE"]
+            };
+            var options = {
+                indexAxis: "y",
+                plugins: {
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                                modifierKey: 'ctrl',
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'x',
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'x',
+                        },
+                        limits: {
+                            x: {min: 1640995200000, max: 2524608000000} // De janvier 2022 à janvier 2050
+                        },
+                    },
+                    annotation: {
+                        annotations: [
+                            {
+                                type: "line",
+                                xMin: Date.now(),
+                                xMax: Date.now(),
+                                label: {
+                                    content: [new Date().toLocaleDateString("fr")],
+                                    display: true,
+                                    position: "center",
+                                    yAdjust: -20,
+                                    font: {
+                                        size: 10
+                                    },
+                                },
+                            },
+                        ]
+                    },
+                    datalabels: {
+                        display: true,
+                        // anchor: 'start',
+                        // align: 'right',
+                        backgroundColor: '#ccc',
+                        borderRadius: 3,
+                        font: {
+                            color: 'red',
+                            weight: 'bold',
+                        },
+                        formatter: function(value, context) {
+                            if (Math.ceil((new Date(value[1]).getTime() - new Date(value[0]).getTime()) / 86400000) - 1 === 0) {
+                            return Math.ceil((new Date(value[1]).getTime() - new Date(value[0]).getTime()) / 86400000) + " jour";
+                            } else {
+                            return Math.ceil((new Date(value[1]).getTime() - new Date(value[0]).getTime()) / 86400000) + " jours";
+                            }
+                        },
+                    },
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem, data, value) {
+                                if (Math.ceil((new Date(tooltipItem.raw[1]).getTime() - new Date(tooltipItem.raw[0]).getTime()) / 86400000) - 1 === 0) {
+                                return "Le " + new Date(tooltipItem.raw[0]).toLocaleDateString("fr");
+                                } else {
+                                return "Du " + new Date(tooltipItem.raw[0]).toLocaleDateString("fr") + " au " + new Date(tooltipItem.raw[1] - 24*60*60*1000).toLocaleDateString("fr") + " (inclus)";
+                                }
+                            }
+                        },
+                    },
+                },
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: "time",
+                        time: {
+                            displayFormats: {
+                                month: 'MMM YYYY',
+                                week: 'MMM YYYY',
+                                day: 'DD MMM YYYY',
+                                hour: 'DD/MM/YY HH:mm',
+                                minute: 'DD/MM/YY HH:mm',
+                                second: 'DD/MM/YY HH:mm:ss',
+                                millisecond: 'DD/MM/YY HH:mm:ss',
+                            },
+                        },
+                        stacked: false,
+                        grid: {
+                            display: false,
+                        },
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 30
+                        },
+                        min: Date.now() - (24*60*60*1000*31*6),
+                        max: Date.now() + (24*60*60*1000*31*6),
+                    },
+                    y: {
+                        stacked: true
+                    }
+                }
+            };
+            var type = "bar";
+            
+            var ctx = document.getElementById("graphAbsences");
+            ctx.height= 50;
+            var graphAbsences = new Chart(ctx, {plugins: [ChartDataLabels, 'chartjs-plugin-annotation'], options, data, type});
+            
+            {# Causeries Complex Display #}
+                function scrollToEl(element, container, diff=0) {
+                    container.scrollTop = element.offsetTop + diff;
+                    //console.log(element.offsetTop + diff)
+                }
+                function goToScholarYear(id) {
+                    scrollToEl(document.getElementById(id), document.getElementById('causeries'), -54);
+                }
+                goToScholarYear('{{ scholar_year }}')
+
+                function search(e) {
+                    // Search by Text Content
+                    let include = [];
+                    for (const div of document.querySelectorAll('div.search')) {
+                        div.style.border = "";
+                        if (div.textContent.toLowerCase().includes(e.value.toLowerCase())) {
+                          include.push(div);
+                        }
+                    }
+                    //console.log(include)
+                    if (e.value != "") {
+                        document.getElementById("nbResults").innerHTML = "Nombre de résultats: " + include.length;
+                        for (element in include) {
+                            //console.log(include[element])
+                            scrollToEl(include[0], document.getElementById('causeries'), -54);
+                            include[element].style.border = "solid blue";
+                        }
+
+                        //if (include.length == 1) {
+                        //    //console.log(include[0], include[0].offsetTop)
+                        //    scrollToEl(include[0], document.getElementById('causeries'), -54);
+                        //}
+
+                        // Search by ID
+                        //if (document.getElementById(e.value)) {
+                        //    scrollToEl(document.getElementById(e.value), document.getElementById('causeries'), -54);
+                        //}
+                    } else {
+                        document.getElementById("nbResults").innerHTML = "Nombre de résultats: 0";
+                    }
+                }
+
+                function getTheme(field, sheet, index) {
+                    const request = new XMLHttpRequest()
+                    if (field.value) {
+                        request.open('POST', `/addTheme/${sheet}/${index}/${field.value}`)
+                        request.send();
+                    } else {
+                        request.open('POST', `/addTheme/${sheet}/${index}/undefined`)
+                        request.send();
+                    }
+                }
+    
+                function getDate(field, sheet, index) {
+                    const request = new XMLHttpRequest()
+                    if (field.value) {
+                        var card = field.parentElement.parentElement
+                        var themeField = card.children[1].children[0]
+                        if (!field.classList.contains('bg-success')) {
+                            field.classList.add('bg-success');
+                            themeField.classList.add('bg-success');
+                            card.classList.add('bg-success');
+                        }
+                        if (typeof index !== 'undefined') {
+                            request.open('POST', `/addDate/${sheet}/${index}/${field.value}`)
+                            request.send();
+                        }
+                    } else {
+                        var card = field.parentElement.parentElement
+                        var themeField = card.children[1].children[0]
+                        if (field.classList.contains('bg-success')) {
+                            field.classList.remove('bg-success')
+                            themeField.classList.remove('bg-success');
+                            card.classList.remove('bg-success');
+                        }
+                        if (typeof index !== 'undefined') {
+                            request.open('POST', `/addDate/${sheet}/${index}/undefined`)
+                            request.send();
+                        }
+                    }
+                }
+
+                var elements = document.querySelectorAll('#causeries input[type="date"]');
+                for(var i = 0; i < elements.length; i++) {
+                    getDate(elements[i]);
+                }
+                var elements = document.querySelectorAll('#causeriesTable input[type="date"]');
+                for(var i = 0; i < elements.length; i++) {
+                    getDateTable(elements[i]);
+                }
+            {# endRegion #}
+            
+
+            function confirmBox(index) {
+                if (confirm("Confirmez-vous ?") == true) {
+                    window.location="/removeAbsence/" + index
+                }
+            }
+
+            function getDateTable(field, index) {
+                const request = new XMLHttpRequest()
+                if (field.value) {
+                    var card = field.parentElement.parentElement
+                    if (!field.classList.contains('bg-success')) {
+                        field.classList.add('bg-success');
+                        card.classList.add('bg-success');
+                    }
+                    if (typeof index !== 'undefined') {
+                        request.open('POST', `/addDateTable/${index}/${field.value}`)
+                        request.send();
+                    }
+                } else {
+                    var card = field.parentElement.parentElement
+                    if (field.classList.contains('bg-success')) {
+                        field.classList.remove('bg-success')
+                        card.classList.remove('bg-success');
+                    }
+                    if (typeof index !== 'undefined') {
+                        request.open('POST', `/addDateTable/${index}/undefined`)
+                        request.send();
+                    }
+                }
+            }
+
+            // DataTables
+            window.addEventListener('DOMContentLoaded', event => {
+                $(document).ready(function() {
+                    $('#absencesDatatable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
+                        },
+                        lengthMenu: [5, 10, 20, 50],
+                        order: [[3, 'asc']],
+                        searching: true,
+                        paging:   true,
+                        info:     true,
+                        columnDefs: [ {
+                            targets: [4],
+                            orderable: false,
+                        }]
+                    });
+                });
+                $(document).ready(function() {
+                    $('#CompteurTeletravail').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
+                        },
+                        order: [[1, 'desc']],
+                        searching: false,
+                        paging:   false,
+                        info:     false,
+                    });
+                });
+                $(document).ready(function() {
+                    $('#TopEmailsDatatable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
+                        },
+                        order: [[1, 'desc']],
+                        searching: false,
+                        paging:   false,
+                        info:     false,
+                    });
+                });
+                $(document).ready(function() {
+                    $('#causeriesTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
+                        },
+                        lengthMenu: [5, 10, 20, 50],
+                        order: [[0, 'desc'],[1, 'desc']]
+                    });
+                });
+            });
+
+        </script>
+{% endblock %}
+
+{% block content %}
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Service Informatique</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+                            <li class="breadcrumb-item active">Service Informatique</li>
+                        </ol>
+
+                        <!-- Modal mod compteur-->
+                        <div class="modal" id="modCompteur" tabindex="-1" style="top: 0; position: fixed">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title">Modifier</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                    <form action="{{ url_for('modCompteur') }}" method="post">
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                {% for index in range(df_compteur_data|length) %}
+                                                    <label for="{{ df_compteur_data['trg'][index] }}" class="col-form-label">{{ df_compteur_data['trg'][index] }}:</label>
+                                                    <input type="text" class="form-control" value="{{ df_compteur_data['compteur'][index] }}" name="{{ df_compteur_data['trg'][index] }}" id="{{ df_compteur_data['trg'][index] }}" required>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                                        </div>
+                                    </form>
+                              </div>
+                            </div>
+                        </div>
+                        <!-- Modal add absences-->
+                        <div class="modal" id="addAbsences" tabindex="-1" style="top: 0; position: fixed">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title">Ajouter</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                    <form action="{{ url_for('addAbsences') }}" method="post">
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <select name="trg" id="trg">
+                                                    {% for index in range(df_compteur_data|length) %}
+                                                        <option value="{{ df_compteur_data['trg'][index] }}">{{ df_compteur_data['trg'][index] }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <br>
+                                                <label for="daterange" id="daterange">Période: </label>
+
+                                                <input type="text" name="daterange" value="" />
+                                                <script>
+                                                    $(function() {
+                                                        moment.locale('fr');
+                                                        $('input[name="daterange"]').daterangepicker({
+                                                            "locale": {
+                                                                "applyLabel": "Valider",
+                                                                "cancelLabel": "Annuler",
+                                                            },
+                                                            opens: 'left'
+                                                        }, function(start, end, label) {
+                                                            console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+                                                        });
+                                                    });
+                                                </script>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                                        </div>
+                                    </form>
+                              </div>
+                            </div>
+                        </div>
+                        <!-- Modal add Causerie-->
+                        <div class="modal" id="addCauserie" tabindex="-1" style="top: 0; position: fixed">
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h5 class="modal-title">Ajouter</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                    <form action="{{ url_for('addCauserie') }}" method="post">
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label for="month" class="col-form-label">Mois:</label><br>
+                                                <select name="month" id="month">
+                                                    {% for index in range(month|length) %}
+                                                        <option value="{{ month[index] }}">{{ month[index] }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <br>
+                                                <label for="scholarYear" class="col-form-label">Année Scolaire:</label>
+                                                <input type="text" class="form-control" name="scholarYear" id="scholarYear" required>
+                                                <br>
+                                                <label for="subject" class="col-form-label">Thème:</label>
+                                                <input type="text" class="form-control" name="subject" id="subject" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                                        </div>
+                                    </form>
+                              </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xl-3">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <button type="button" style="float: left;" class="modBtn btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modCompteur"><i class="fa-solid fa-gear"></i></button>
+                                        <i class="fa-solid fa-house-laptop"></i>
+                                        Compteur Télétravail<br>
+                                        Dernière MàJ: {{ compteurlastUpdate }}
+                                    </div>
+                                    <div class="card-body">
+                                        <table id="CompteurTeletravail" class="table table-bordered table-striped display">
+                                            <thead>
+                                                <tr>
+                                                    <th>TRG</th>
+                                                    <th>Nombre de Créneaux</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for index in range(df_compteur_data|length) %}
+                                                    <tr>
+                                                        <td>{{ df_compteur_data['trg'][index] }}</td>
+                                                        <td>{{ df_compteur_data['compteur'][index] }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-5">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <button type="button" style="float: left;" class="addBtn btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#addAbsences"><i class="fa-solid fa-plus"></i></button>
+                                        <i class="fa-solid fa-house"></i>
+                                        Congé / Absences à venir<br>
+                                        Dernière MàJ: {{ absenceslastUpdate }}
+                                    </div>
+                                    <div class="card-body">
+                                        <table id="absencesDatatable" class="table table-bordered table-striped display">
+                                            {% if not df_absences_data.empty %}
+                                                {% set df_absences_data = df_absences_data[df_absences_data['Is Past'] == False].reset_index(drop=True) %}
+                                            {% endif %}
+                                            <thead>
+                                                <tr>
+                                                    <th>TRG</th>
+                                                    <th>Date de début</th>
+                                                    <th>Date de fin</th>
+                                                    <th>Temps</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for index in range(df_absences_data|length) %}
+                                                    <tr>
+                                                        <td>{{ df_absences_data['trg'][index] }}</td>
+                                                        <td data-order="{{ df_absences_data['dateDebut'][index] }}" >{{ df_absences_data['dateDebut'][index].strftime('%d/%m/%Y') }}</td>
+                                                        <td data-order="{{ df_absences_data['dateFin'][index] }}" >{{ df_absences_data['dateFin'][index].strftime('%d/%m/%Y') }}</td>
+                                                        {% if df_absences_data['In Progress'][index] == False %}
+                                                            <td data-order="{{df_absences_data['Starts In'][index] + 1000}}" >Début dans {{df_absences_data['Starts In'][index]}} jour(s)</td>
+                                                        {% else %}
+                                                            <td data-order="{{df_absences_data['Ends In'][index]}}" >Fin dans {{df_absences_data['Ends In'][index]}} jour(s)</td>
+                                                        {% endif%}
+                                                        <td><a onclick="confirmBox({{df_absences_data['index'][index]}})" class="btn btn-outline-dark" style="float: right;"><i class="fa-solid fa-trash"></i></a></td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-envelope"></i>
+                                        Top Emails Service Informatique<br>
+                                        Dernière MàJ: {{mailslastUpdate}}
+                                    </div>
+                                    <div class="card-body">
+                                        <table id="TopEmailsDatatable" class="table table-bordered table-striped display">
+                                            <thead>
+                                                <tr>
+                                                    <th>TRG</th>
+                                                    <th>Nombre de Mails / Réunions</th>
+                                                    <th>Stockage Utilisé</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for index in range(df_mails_data|length) %}
+                                                    <tr>
+                                                        <td>{{ df_mails_data['TRG'][index] }}</td>
+                                                        <td>{{ df_mails_data['Item Count'][index] }}</td>
+                                                        <td data-order="{{ df_mails_data['Storage Used (Byte)'][index] }}">{{  df_mails_data['Converted Storage'][index] }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xxl-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <button type="button" style="float: left;" class="addBtn btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#addCauserie"><i class="fa-solid fa-plus"></i></button>
+                                        <i class="fa-solid fa-house"></i>
+                                        Thématique Causeries Tableau
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="causeriesTable" class="table table-bordered table-striped display">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Année Scolaire</th>
+                                                        <th>Mois</th>
+                                                        <th>Thème</th>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for index in range(df_causerieTable_data|length) %}
+                                                        <tr>
+                                                            <td>{{ df_causerieTable_data['annee'][index] }}</td>
+                                                            <td data-order="{{ month.index(df_causerieTable_data['mois'][index]) }}">{{ df_causerieTable_data['mois'][index] }}</td>
+                                                            <td>{{ df_causerieTable_data['theme'][index] }}</td>
+                                                            <td data-order="{{ df_causerieTable_data['date'][index] }}"><input type="date" value="{{ df_causerieTable_data['date'][index] }}" onchange="getDateTable(this, {{index}});"></td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xxl-8">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-house"></i>
+                                        Graphique Congés / Absences
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-wrapper">
+                                            <canvas id="graphAbsences"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xxl-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-house"></i>
+                                        Thématique Causeries
+                                        <a style="float: left" class="btn btn-outline-dark" onclick="goToScholarYear('{{ scholar_year }}')">Actuel</a>
+                                        <p id="nbResults" style="float: right">Nombre de résultats: 0</p>
+                                        <input style="float: right" type="text" onkeyup="search(this)" placeholder="Rechercher">
+                                    </div>
+                                    <div class="card-body" id="causeries" style="height: 520px; overflow-y: scroll; scroll-behavior: smooth; scroll-padding-top: 10px;">
+                                        {% for i in range(dict_causeries|list|length) %}
+                                            <div class="row">
+                                                <div class="col-1 search" style="position: relative;">
+                                                    <div class="year">{{ (dict_causeries|list)[i] }}</div>
+                                                    <div class="year" style="position: absolute; bottom: 10px; width: calc(100% - 20px); text-align: center;">{{ (dict_causeries|list)[i] }}</div>
+                                                </div>
+                                                <div class="col-lg-11">
+                                                    <div class="row">
+                                                        {% for month in range((dict_causeries.values()|list)[i]|length) %}
+                                                            <div class="col-lg-3">
+                                                                {% if (dict_causeries.values()|list)[i]['mois'][month] != 'Aout' %}
+                                                                    <div class="card mb-4 search" id="{{ (dict_causeries.values()|list)[i]['mois'][month]|string() + ((dict_causeries|list)[i])|string() }}">
+                                                                        <div class="card-header fw-bold">
+                                                                            {{ (dict_causeries.values()|list)[i]['mois'][month] }}
+                                                                        </div>
+                                                                        <div class="card-body center">
+                                                                            <textarea style="text-align: center; resize: none; height: 45px;" name="text" oninput='this.value = this.value.replace(/[/]/, "");' onchange="getTheme(this,{{i}},{{month}});">{{ (dict_causeries.values()|list)[i]['theme'][month] }}</textarea>
+                                                                        </div>
+                                                                        <div class="card-footer text-center">
+                                                                            <input type="date" value="{{ (dict_causeries.values()|list)[i]['date'][month] }}" onchange="getDate(this,{{i}},{{month}});">
+                                                                        </div>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div><br>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xxl-12">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-brands fa-microsoft"></i>
+                                        Licences Office
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-xl-6">
+                                                <div class="row">
+                                                    <div class="col-xl-6">
+                                                        <div class="card mb-4">
+                                                            <div class="card-header">
+                                                                O365 A1 Etudiants
+                                                            </div>
+                                                            <div class="card-body center">
+                                                                {{ df_license_data.query("`Product_Display_Name`.str.contains('Office 365 A1 for students')")['consumedUnits'].values[0] }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-xl-6">
+                                                        <div class="card mb-4">
+                                                            <div class="card-header">
+                                                                O365 A1 Plus Etudiants
+                                                            </div>
+                                                            <div class="card-body center">
+                                                                {{ df_license_data.query("`Product_Display_Name`.str.contains('Office 365 A1 Plus for students')")['consumedUnits'].values[0] }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card mb-4">
+                                                    <div class="card-header">
+                                                        Microsoft 365 Etudiants
+                                                    </div>
+                                                    <div class="card-body center">
+                                                        {{ df_license_data.query("`Product_Display_Name`.str.contains('Microsoft 365 Apps for Students')")['consumedUnits'].values[0] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-6">
+                                                <div class="card mb-4">
+                                                    <div class="card-header">
+                                                        O365 A1 Enseignants
+                                                    </div>
+                                                    <div class="card-body center">
+                                                        {{ df_license_data.query("`Product_Display_Name`.str.contains('Office 365 A1 for faculty')")['consumedUnits'].values[0] }}
+                                                    </div>
+                                                </div>
+                                                <div class="card mb-4">
+                                                    <div class="card-header">
+                                                        Microsoft 365 Enseignants
+                                                    </div>
+                                                    <div class="card-body center">
+                                                        {{ df_license_data.query("`Product_Display_Name`.str.contains('Microsoft 365 Apps for Faculty')")['consumedUnits'].values[0] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xl-4">
+                                                <div class="card mb-4">
+                                                    <div class="card-header">
+                                                        Licence Project Online
+                                                    </div>
+                                                    <div class="card-body center">
+                                                        {{ df_license_data.query("`Product_Display_Name`.str.contains('Project Online Essentials')")['consumedUnits'].values[0] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4">
+                                                <div class="card mb-4">
+                                                    <div class="card-header">
+                                                        Licence Power BI
+                                                    </div>
+                                                    <div class="card-body center">
+                                                        {{ df_license_data.query("`Product_Display_Name`.str.contains('Power BI')")['consumedUnits'].values[0] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-4">
+                                                <div class="card mb-4">
+                                                    <div class="card-header">
+                                                        Licence Power Automate Free
+                                                    </div>
+                                                    <div class="card-body center">
+                                                        {{ df_license_data.query("`Product_Display_Name`.str.contains('Microsoft Power Automate Free')")['consumedUnits'].values[0] }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </main>
+{% endblock content %}

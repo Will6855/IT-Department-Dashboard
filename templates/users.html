@@ -1,0 +1,590 @@
+{% extends 'base.html' %}
+
+{# region Calcul de variable #}
+    {% set df_salarie_data = df_user_data.query("~`jobTitle`.str.contains('^Appren') and `companyName` != ''") %}
+    {% set df_salarie_fonction = df_salarie_data.groupby('jobTitle').size() %}
+
+    {% set df_oneDriveFile = df_onedrive_data.sort_values(by='File Count', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_oneDriveStorage = df_onedrive_data.sort_values(by='Storage Used (Byte)', ascending=False).reset_index(drop=True).head(10) %}
+
+    {% set df_filtered_data = df_user_data.query("`jobTitle`.str.contains('^Appren')") %}
+    {% set df_ApprenantGraphDepartement = df_filtered_data.groupby('department').size() %}
+    {% set df_ApprenantGraphDepartement = df_ApprenantGraphDepartement.rename({"" : "(Vide)"}) %}
+
+{# endregion #}
+
+{% block variable %}
+        <script>
+            var ApprenantGraphDepartement_title = {{ df_ApprenantGraphDepartement.index.tolist()|safe }};
+            var ApprenantGraphDepartement_counts = {{ df_ApprenantGraphDepartement.tolist()|safe }};
+
+            var salarieFonctionGraph_title = {{ df_salarie_fonction.index.tolist()|safe }};
+            var salarieFonctionGraph_counts = {{ df_salarie_fonction.tolist()|safe }};
+
+            var oneDriveFile_title = {{ df_oneDriveFile['Owner Display Name'].tolist()|safe }};
+            var oneDriveFile_counts = {{ df_oneDriveFile['File Count'].tolist()|safe }};
+
+            var oneDriveStorage_title = {{ df_oneDriveStorage['Owner Display Name'].tolist()|safe }};
+            var oneDriveStorage_counts = {{ df_oneDriveStorage['Storage Used (Byte)'].tolist()|safe }};
+        </script>
+{% endblock %}
+
+{% block javascript %}
+        <script>
+            function reorder(labels, values) {
+                // Combine the counts and names into an array of objects
+                var combinedData = values.map(function(count, index) {
+                    return {
+                    count: count,
+                    name: labels[index]
+                    };
+                });
+                
+                // Sort the combinedData array in descending order based on the count
+                combinedData.sort(function(a, b) {
+                    return b.count - a.count;
+                });
+                
+                // Separate the sorted counts and names into separate arrays
+                var sortedValues = combinedData.map(function(data) {
+                    return data.count;
+                });
+                
+                var sortedLabels = combinedData.map(function(data) {
+                    return data.name;
+                });
+                
+                return { sortedLabels, sortedValues }
+            }
+              
+            function humanFileSize(size) {
+                var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+                return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+            }
+
+            var sortedData = reorder(ApprenantGraphDepartement_title, ApprenantGraphDepartement_counts)
+            var ctx = document.getElementById("ApprenantGraphDepartement");
+            ctx.height = 300;
+            var ApprenantGraphDepartement = new Chart(ctx, {
+                type: 'bar',
+                
+                data: {
+                    labels: sortedData.sortedLabels,
+                    datasets: [{
+                    label: "Nombre d'apprennant",
+                    data: sortedData.sortedValues,
+                    backgroundColor: '#007bff',
+                    }],
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        zoom: {
+                            zoomLevel: 10,
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    modifierKey: 'ctrl',
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'y',
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'y',
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            max: 15, 
+                        }
+                    }
+                }
+            });
+            
+            var sortedData = reorder(salarieFonctionGraph_title, salarieFonctionGraph_counts)
+            var ctx = document.getElementById("salarieFonctionGraph");
+            ctx.height = 300;
+            var salarieFonctionGraph = new Chart(ctx, {
+                type: 'bar',
+                
+                data: {
+                    labels: sortedData.sortedLabels,
+                    datasets: [{
+                    label: "Nombre de salarié",
+                    data: sortedData.sortedValues,
+                    backgroundColor: '#007bff',
+                    }],
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        zoom: {
+                            zoomLevel: 10,
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    modifierKey: 'ctrl',
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'y',
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'y',
+                            },
+                        },
+                    },
+                    scales: {
+                        y: {
+                            max: 15, 
+                        }
+                    }
+                }
+            });
+            
+            var ctx = document.getElementById("oneDriveFile");
+            ctx.height = 100;
+            var oneDriveFile = new Chart(ctx, {
+                type: 'bar',
+                
+                data: {
+                    labels: oneDriveFile_title,
+                    datasets: [{
+                    label: "Nombre de fichiers",
+                    data: oneDriveFile_counts,
+                    backgroundColor: '#007bff',
+                    }],
+                },
+                options: {
+                    indexAxis: 'y',
+                }
+            });
+
+            var ctx = document.getElementById("oneDriveStorage");
+            ctx.height = 100;
+            var oneDriveStorage = new Chart(ctx, {
+                type: 'bar',
+                
+                data: {
+                    labels: oneDriveStorage_title,
+                    datasets: [{
+                    label: "Stockage Utilisé",
+                    data: oneDriveStorage_counts,
+                    backgroundColor: '#007bff',
+                    }],
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem, data, value) {
+                                    return "Stockage Utilisé: " + humanFileSize(oneDriveStorage_counts[tooltipItem.dataIndex]);
+                                }
+                            },
+                        },
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value, index, values) {
+                                return humanFileSize(value);
+                                },
+                                /*callback: function(value) {
+                                return daylist[value];
+                                //return monthlist[value];
+                                },*/
+                            },
+                        },
+                    }
+                }
+            });
+
+            // DataTables and Filters
+            window.addEventListener('DOMContentLoaded', event => {
+                $(document).ready(function() {
+                    $('#tableauUtilisateurs tfoot th').each(function () {
+                        var title = $(this).text();
+                        if (this.cellIndex != 0) {
+                            $(this).html('<input style="width: 100%" type="text" placeholder="' + title + '" />');
+                        }
+                    });
+            
+                    var tableauUtilisateurs = $('#tableauUtilisateurs').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
+                        },
+                        lengthMenu: [5, 10, 20, 50, 100, 200, 500],
+                        iDisplayLength: 10,
+                        order: [[1, 'asc']],
+                        dom: 'lpftrip',
+                        columnDefs: [ {
+                            targets: [0],
+                            orderable: false,
+                        }],
+                        initComplete: function () {
+                            // Apply the search
+                            this.api()
+                                .columns()
+                                .every(function () {
+                                    var that = this;
+                                    if (that.selector.cols != 0) {
+                                        $('input', this.footer()).on('keyup change clear', function () {
+                                            if (that.search() !== this.value) {
+                                                that.search(this.value).draw();
+                                            }
+                                        });
+                                    }
+                                    // console.log(that)
+                
+                                });
+                        },
+                        // "scrollX": true,
+                    });
+
+                    function removeFilters() {
+                        $('#tableauUtilisateurs tfoot input').val('').change();
+                        var elements = document.getElementsByClassName("active-filter");
+                        for (var i = 0; i < elements.length; i++) {
+                            elements[i].classList.remove("active-filter");
+                        }
+                    }
+            
+                    $('#sansMetier').on('click', function () {
+                        var parentElement = document.getElementById("sansMetier").parentElement
+                        if (parentElement.classList.contains("active-filter")) {
+                            parentElement.classList.remove("active-filter");
+                            tableauUtilisateurs.column(5).search('').draw();
+                        } else {
+                            parentElement.classList.add("active-filter");
+                            tableauUtilisateurs.column(5).search("^$", true, true).draw();
+                        }
+                    })
+                    $('#sansService').on('click', function () {
+                        var parentElement = document.getElementById("sansService").parentElement
+                        if (parentElement.classList.contains("active-filter")) {
+                            parentElement.classList.remove("active-filter");
+                            tableauUtilisateurs.column(6).search('').draw();
+                        } else {
+                            parentElement.classList.add("active-filter");
+                            tableauUtilisateurs.column(6).search("^$", true, true).draw();
+                        }
+                    })
+                    $('#inviteSansGroupe').on('click', function () {
+                        var parentElement = document.getElementById("inviteSansGroupe").parentElement
+                        if (parentElement.classList.contains("active-filter")) {
+                            parentElement.classList.remove("active-filter");
+                            tableauUtilisateurs.column(3).search('').draw();
+                            tableauUtilisateurs.column(11).search('').draw();
+                        } else {
+                            parentElement.classList.add("active-filter");
+                            tableauUtilisateurs.column(3).search('Guest').draw();
+                            tableauUtilisateurs.column(11).search("^0$", true, true).draw();
+                        }
+                    })
+                    $('#nonApprenNonGenNonInviteSansSociete').on('click', function () {
+                        var parentElement = document.getElementById("nonApprenNonGenNonInviteSansSociete").parentElement
+                        if (parentElement.classList.contains("active-filter")) {
+                            parentElement.classList.remove("active-filter");
+                            tableauUtilisateurs.column(3).search('').draw();
+                            tableauUtilisateurs.column(5).search('').draw();
+                            tableauUtilisateurs.column(7).search('').draw();
+                        } else {
+                            parentElement.classList.add("active-filter");
+                            tableauUtilisateurs.column(3).search('^((?!(Guest)).)*$', true, true).draw();
+                            tableauUtilisateurs.column(5).search('^((?!(Appren)).)*$ | ^((?!(Générique)).)*$', true, true).draw();
+                            tableauUtilisateurs.column(7).search("^$", true, true).draw();
+                        }
+                    })
+                    
+                    $('#removeFilters').on('click', function () {
+                        removeFilters();
+                    })
+                });
+            });
+        </script>
+{% endblock %}
+
+{% block content %}
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Utilisateurs</h1>
+                        <a href="/userUpdate" class="reloadButton btn btn-outline-dark" ><i class="fa-solid fa-rotate-right"></i></a>
+                        Dernière MàJ: {{ lastUpdate }}
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+                            <li class="breadcrumb-item active">Utilisateurs</li>
+                        </ol>
+
+
+                        <div class="row">
+                            <div class="col-xl-8">
+                                <div class="row">
+                                    <div class="col-xl-4 vertical-center">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <i class="fa-solid fa-user-group"></i>
+                                                Nombre total d'utilisateurs
+                                            </div>
+                                            <div class="card-body center">
+                                                {{ df_user_data | length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-2">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <i class="fa-solid fa-user-group"></i>
+                                                Dont Apprenants
+                                            </div>
+                                            <div class="card-body center">
+                                                {{ df_user_data.query("`jobTitle`.str.contains('^Appren')") | length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-2">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <i class="fa-solid fa-user-group"></i>
+                                                Dont Salariés
+                                            </div>
+                                            <div class="card-body center">
+                                                {{ df_user_data.query("`companyName` != ''") | length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-2">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <i class="fa-solid fa-user-group"></i>
+                                                Dont Invités
+                                            </div>
+                                            <div class="card-body center">
+                                                {{ df_user_data.query("`userType`.str.contains('Guest')") | length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-2">
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <i class="fa-solid fa-user-group"></i>
+                                                Dont Génériques
+                                            </div>
+                                            <div class="card-body center">
+                                                {{ df_user_data.query("`jobTitle`.str.contains('Générique')") | length }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                    <i class="fa-solid fa-filter"></i>
+                                    Filtres d'Anomalie
+                                    </div>
+                                    <div class="card-body row">
+                                        <div class="col-xl-2 vertical-center">
+                                            <div class="card mb-4">
+                                            <a id="sansMetier" type="button">
+                                                <div class="card-header">
+                                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                                    Utilisateurs sans Fonction
+                                                </div>
+                                                <div class="card-body center">
+                                                {{ df_user_data.query("`jobTitle` == ''")|length }}
+                                                <div class="animated-progress progress-bar">
+                                                    <span data-progress="{{ 100 -(df_user_data.query("`jobTitle` == ''")|length / df_user_data|length * 100)|round(1) }}"></span>
+                                                </div>
+                                                </div>
+                                            </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-2 vertical-center">
+                                            <div class="card mb-4">
+                                            <a id="sansService" type="button">
+                                                <div class="card-header">
+                                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                                    Utilisateurs sans Service
+                                                </div>
+                                                <div class="card-body center">
+                                                {{ df_user_data.query("`department` == ''")|length }}
+                                                <div class="animated-progress progress-bar">
+                                                    <span data-progress="{{ 100 -(df_user_data.query("`department` == ''")|length / df_user_data|length * 100)|round(1) }}"></span>
+                                                </div>
+                                                </div>
+                                            </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-2 vertical-center">
+                                            <div class="card mb-4">
+                                            <a id="inviteSansGroupe" type="button">
+                                                <div class="card-header">
+                                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                                    Invités sans<br> Groupe
+                                                </div>
+                                                <div class="card-body center">
+                                                    {{ df_user_data.query("`userType`.str.contains('Guest') and `Appartenances` == 0")|length }}
+                                                <div class="animated-progress progress-bar">
+                                                    <span data-progress="{{ 100 -(df_user_data.query("`userType`.str.contains('Guest') and `Appartenances` == 0")|length / df_user_data|length * 100)|round(1) }}"></span>
+                                                </div>
+                                                </div>
+                                            </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-3 vertical-center">
+                                            <div class="card mb-4">
+                                            <a id="nonApprenNonGenNonInviteSansSociete" type="button">
+                                                <div class="card-header">
+                                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                                    Utilisateurs non-apprenant, non-generique, non-invité sans Société
+                                                </div>
+                                                <div class="card-body center">
+                                                    {{ df_user_data.query("~`jobTitle`.str.contains('^Appren') and ~`userType`.str.contains('Guest') and ~`jobTitle`.str.contains('Générique') and `companyName` == ''") | length }}
+                                                <div class="animated-progress progress-bar">
+                                                    <span data-progress="{{ 100 -(df_user_data.query("~`jobTitle`.str.contains('^Appren') and ~`userType`.str.contains('Guest') and ~`jobTitle`.str.contains('Générique') and `companyName` == ''") | length / df_user_data|length * 100)|round(1) }}"></span>
+                                                </div>
+                                                </div>
+                                            </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-xl-3 mx-auto vertical-center">
+                                            <div class="card mb-4">
+                                            <a id="removeFilters" type="button">
+                                                <div class="card-body center">
+                                                    <i class="fa-solid fa-filter-circle-xmark"></i>
+                                                    Retirer les Filtres
+                                                </div>
+                                            </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-table me-1"></i>
+                                        Utilisateurs
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="tableauUtilisateurs" class="table table-bordered table-striped display">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Photo</th>
+                                                        <th>Nom d'utilisateur</th>
+                                                        <th>TRG</th>
+                                                        <th>Type de compte</th>
+                                                        <th>Mail</th>
+                                                        <th>Fonction</th>
+                                                        <th>Service</th>
+                                                        <th>Société</th>
+                                                        <th>Numéro Professionnel</th>
+                                                        <th>Numéro Portable</th>
+                                                        <th>Numéro Interne</th>
+                                                        <th>Appartenance</th>
+                                                        <th>Compte Activé</th>
+                                                        <th>Date de création</th>
+                                                    </tr>
+                                                </thead>
+                                                <tfoot>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th>Nom d'utilisateur</th>
+                                                        <th>TRG</th>
+                                                        <th>Type de compte</th>
+                                                        <th>Mail</th>
+                                                        <th>Fonction</th>
+                                                        <th>Service</th>
+                                                        <th>Société</th>
+                                                        <th>Numéro Professionnel</th>
+                                                        <th>Numéro Portable</th>
+                                                        <th>Numéro Interne</th>
+                                                        <th>Appartenance</th>
+                                                        <th>Compte Activé</th>
+                                                        <th>Date de création</th>
+                                                    </tr>
+                                                </tfoot>
+                                                <tbody>
+
+                                                {% for user in range(df_user_data | length) %}
+                                                    <tr>
+                                                        <td><img style="height: 50px; border-radius: 50%" src="{{ df_user_data['Photo'][user] }}"></td>
+                                                        <td>{{ df_user_data['displayName'][user] }}</td>
+                                                        <td>{{ df_user_data['TRG'][user] }}</td>
+                                                        <td>{{ df_user_data['userType'][user] }}</td>
+                                                        <td>{{ df_user_data['mail'][user] | urlize }}</td>
+                                                        <td>{{ df_user_data['jobTitle'][user] }}</td>
+                                                        <td>{{ df_user_data['department'][user] }}</td>
+                                                        <td>{{ df_user_data['companyName'][user] }}</td>
+                                                        <td>{{ df_user_data['businessPhones'][user][0] }}</td>
+                                                        <td>{{ df_user_data['mobilePhone'][user] }}</td>
+                                                        <td>{{ df_user_data['homePhone'][user] }}</td>
+                                                        <td>{{ df_user_data['Appartenances'][user]|int }}</td>
+                                                        <td>{{ df_user_data['accountEnabled'][user] }}</td>
+                                                        <td data-order="{{ df_user_data['createdDateTime'][user] }}">{{ df_user_data['createdDateTime'][user]|formatdatetime(format='%d/%m/%Y') }}</td>
+                                                    </tr>
+                                                {% endfor %}
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-4">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-chart-bar"></i>
+                                        Apprenants par Service
+                                    </div>
+                                    <div class="card-body center">
+                                        <canvas id="ApprenantGraphDepartement"></canvas>
+                                    </div>
+                                </div>
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-chart-bar"></i>
+                                        Salariés par Fonction
+                                    </div>
+                                    <div class="card-body center">
+                                        <canvas id="salarieFonctionGraph"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-chart-bar"></i>
+                                        Top 10 Fichiers OneDrive
+                                    </div>
+                                    <div class="card-body center">
+                                        <canvas id="oneDriveFile"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-chart-bar"></i>
+                                        Top 10 Stockage OneDrive
+                                    </div>
+                                    <div class="card-body center">
+                                        <canvas id="oneDriveStorage"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </main>
+{% endblock content %}

@@ -1,0 +1,234 @@
+{# region Calcul de variable #}
+    {% set apprenant_sum = df_user_data.query("`jobTitle`.str.startswith('Appren')")|length %}
+    {% set formateur_sum = df_user_data.query("`jobTitle`.str.startswith('Format')")|length %}
+    {% set vide_sum = df_user_data.query("`jobTitle` == ''")|length %}
+    {% set reste_sum = df_user_data|length - (apprenant_sum + formateur_sum + vide_sum) %}
+
+    {% set noJob_sum = df_user_data.query("`jobTitle` == ''")|length %}
+    {% set noService_sum = df_user_data.query("`department` == ''")|length %}
+    {% set inviteSansGroupe_sum = df_user_data.query("`userType`.str.contains('Guest') and `Appartenances` == 0")|length %}
+    {% set nonApprenNonGenNonInviteSansSociete_sum = df_user_data.query("~`jobTitle`.str.contains('^Appren') and ~`userType`.str.contains('Guest') and ~`jobTitle`.str.contains('Générique') and `companyName` == ''") | length %}
+
+
+
+    {% set df_filtered_data = df_user_data.query("`jobTitle`.str.startswith('Appren')") %}
+    {% set df_filtered_data = df_filtered_data.assign(Creation_Year=df_filtered_data['createdDateTime'].str.slice(stop=4)) %}
+    {% set df_apprenantGraphAnomalie = df_filtered_data.groupby('Creation_Year').size() %}
+
+    {% set df_filtered_data = df_user_data.query("`jobTitle`.str.startswith('Formateur')") %}
+    {% set df_filtered_data = df_filtered_data.assign(Creation_Year=df_filtered_data['createdDateTime'].str.slice(stop=4)) %}
+    {% set df_formateurGraphAnomalie = df_filtered_data.groupby('Creation_Year').size() %}
+
+    {% set df_filtered_data = df_user_data.query("~(`jobTitle`.str.startswith('Format') or `jobTitle`.str.startswith('Appren'))") %}
+    {% set df_filtered_data = df_filtered_data.assign(Creation_Year=df_filtered_data['createdDateTime'].str.slice(stop=4)) %}
+    {% set df_resteGraphAnomalie = df_filtered_data.groupby('Creation_Year').size() %}
+
+
+
+    {% set df_data = df_user_data.merge(df_mails_data, left_on="userPrincipalName", right_on="User Principal Name") %}
+
+    {% set df_apprenantTop10PoleFormation = df_data.query("`jobTitle`.str.startswith('Appren') and `User Principal Name`.str.contains('formation-industries-ese')").sort_values(by='Item Count', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_formateurTop10PoleFormation = df_data.query("`jobTitle`.str.startswith('Format') and `User Principal Name`.str.contains('formation-industries-ese')").sort_values(by='Item Count', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_resteTop10PoleFormation = df_data.query("~(`jobTitle`.str.startswith('Format') or `jobTitle`.str.startswith('Appren')) and `User Principal Name`.str.contains('formation-industries-ese')").sort_values(by='Item Count', ascending=False).reset_index(drop=True).head(10) %}
+
+    {% set df_apprenantTop10ITII = df_data.query("`jobTitle`.str.startswith('Appren') and `User Principal Name`.str.contains('itii-normandie')").sort_values(by='Item Count', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_formateurTop10ITII = df_data.query("`jobTitle`.str.startswith('Format') and `User Principal Name`.str.contains('itii-normandie')").sort_values(by='Item Count', ascending=False).reset_index(drop=True).head(10) %}
+    {% set df_resteTop10ITII = df_data.query("~(`jobTitle`.str.startswith('Format') or `jobTitle`.str.startswith('Appren')) and `User Principal Name`.str.contains('itii-normandie')").sort_values(by='Item Count', ascending=False).reset_index(drop=True).head(10) %}
+{# endregion #}
+
+
+{% block variable %}
+        <script>
+            var utilisateursXjob_counts = [{{ apprenant_sum }},{{ formateur_sum }},{{ vide_sum }},{{ reste_sum }}]
+            var utilisateursXjob_labels = ["Apprenant","Formateur","(Vide)","Reste"]
+
+            var anomalieUtilisateurs_counts = [{{ noJob_sum }},{{ noService_sum }},{{ inviteSansGroupe_sum }},{{ nonApprenNonGenNonInviteSansSociete_sum }}]
+            var anomalieUtilisateurs_labels = ["Sans Fonction", "Sans Service", "Invité sans Groupe", "Utilisateurs non-apprenant, non-generique, non-invité sans Société"]
+
+            var apprenantGraphAnomalieUtilisateurs_counts = {{ df_apprenantGraphAnomalie.tolist()|safe }};
+            var apprenantGraphAnomalieUtilisateurs_date = {{ df_apprenantGraphAnomalie.index.tolist()|safe }};
+
+            var formateurGraphAnomalieUtilisateurs_counts = {{ df_formateurGraphAnomalie.tolist()|safe }};
+            var formateurGraphAnomalieUtilisateurs_date = {{ df_formateurGraphAnomalie.index.tolist()|safe }};
+
+            var resteGraphAnomalieUtilisateurs_counts = {{ df_resteGraphAnomalie.tolist()|safe }};
+            var resteGraphAnomalieUtilisateurs_date = {{ df_resteGraphAnomalie.index.tolist()|safe }};
+
+
+
+            var apprenantTop10PoleFormationUtilisateurs_names = {{ df_apprenantTop10PoleFormation['displayName'].tolist()|safe }};
+            var apprenantTop10PoleFormationUtilisateurs_counts = {{ df_apprenantTop10PoleFormation['Item Count'].tolist()|safe }};
+            var formateurTop10PoleFormationUtilisateurs_names = {{ df_formateurTop10PoleFormation['displayName'].tolist()|safe }};
+            var formateurTop10PoleFormationUtilisateurs_counts = {{ df_formateurTop10PoleFormation['Item Count'].tolist()|safe }};
+            var resteTop10PoleFormationUtilisateurs_names = {{ df_resteTop10PoleFormation['displayName'].tolist()|safe }};
+            var resteTop10PoleFormationUtilisateurs_counts = {{ df_resteTop10PoleFormation['Item Count'].tolist()|safe }};
+            
+            var apprenantTop10ITIIUtilisateurs_names = {{ df_apprenantTop10ITII['displayName'].tolist()|safe }};
+            var apprenantTop10ITIIUtilisateurs_counts = {{ df_apprenantTop10ITII['Item Count'].tolist()|safe }};
+            var formateurTop10ITIIUtilisateurs_names = {{ df_formateurTop10ITII['displayName'].tolist()|safe }};
+            var formateurTop10ITIIUtilisateurs_counts = {{ df_formateurTop10ITII['Item Count'].tolist()|safe }};
+            var resteTop10ITIIUtilisateurs_names = {{ df_resteTop10ITII['displayName'].tolist()|safe }};
+            var resteTop10ITIIUtilisateurs_counts = {{ df_resteTop10ITII['Item Count'].tolist()|safe }};
+        </script>
+{% endblock %}
+
+
+<a href="/userUpdate" class="reloadButton btn btn-outline-dark" ><i class="fa-solid fa-rotate-right"></i></a>
+Dernière MàJ: {{ userLastUpdate }}
+<div class="row">
+    <div class="col-xxl-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa-solid fa-user-group"></i>
+                        Utilisateurs par Fonction
+                    </diV>
+                    <div class="card-body" style="display: flex">
+                        <div class="chart-wrapper">
+                            <canvas id="utilisateursXjob"></canvas>
+                        </div>
+                        <div class="infoGraph">
+                        <div>
+                            <b>Apprenant:</b>
+                            <span style="float: right; padding-left: 25px;">{{ apprenant_sum }} utilisateur(s)</span><br>
+                            <b>Formateur:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ formateur_sum }} utilisateur(s)</span><br>
+                            <b>(Vide):</b>
+                            <span style="float: right; padding-left: 25px;">{{ vide_sum }} utilisateur(s)</span><br>
+                            <b>Reste:</b>
+                            <span style="float: right; padding-left: 25px;">{{ reste_sum }} utilisateur(s)</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        Anomalies
+                    </diV>
+                    <div class="card-body" style="display: flex">
+                        <div class="chart-wrapper">
+                            <canvas id="anomalieUtilisateurs"></canvas>
+                        </div>
+                        <div class="infoGraph">
+                        <div>
+                            <b>Sans métier:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ noJob_sum }} utilisateur(s)</span><br>
+                            <b>Sans service:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ noService_sum }} utilisateur(s)</span><br>
+                            <b>Invités sans Groupe:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ inviteSansGroupe_sum }} utilisateur(s)</span><br>
+                            <b>Utilisateurs non-apprenant,<br> non-generique, non-invité sans Société:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ nonApprenNonGenNonInviteSansSociete_sum }} utilisateur(s)</span><br>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-6">
+        <ul class="nav nav-tabs" id="tab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active show" data-bs-toggle="tab" href="#apprenantUsers" data-bs-target=".apprenantUsers">Apprenant</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#formateurUsers" data-bs-target=".formateurUsers">Formateur</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#resteUsers" data-bs-target=".resteUsers">Reste</a>
+            </li>
+        </ul>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                        <i class="fa-solid fa-calendar-week"></i>
+                            Date de Création de l'Utilisateur
+                        </div>
+                        <div class="card-body" style="display: flex">
+                            <div class="chart-wrapper">
+                                <div class="tab-pane fade show active apprenantUsers">
+                                    <canvas id="apprenantGraphAnomalieUtilisateurs"></canvas>
+                                </div>
+                                <div class="tab-pane fade formateurUsers">
+                                    <canvas id="formateurGraphAnomalieUtilisateurs"></canvas>
+                                </div>
+                                <div class="tab-pane fade resteUsers">
+                                    <canvas id="resteGraphAnomalieUtilisateurs"></canvas>
+                                </div>
+                            </div>
+                            <div class="infoGraph">
+                                <div class="tab-pane fade show active apprenantUsers">
+                                    {% for index in range(df_apprenantGraphAnomalie|length) %}
+                                    <b>{{ df_apprenantGraphAnomalie.index[index] }}:</b> 
+                                    <span style="float: right; padding-left: 25px;">{{ df_apprenantGraphAnomalie[index] }} utilisateur(s)</span><br>
+                                    {% endfor %}
+                                </div>
+                                <div class="tab-pane fade formateurUsers">
+                                    {% for index in range(df_formateurGraphAnomalie|length) %}
+                                    <b>{{ df_formateurGraphAnomalie.index[index] }}:</b> 
+                                    <span style="float: right; padding-left: 25px;">{{ df_formateurGraphAnomalie[index] }} utilisateur(s)</span><br>
+                                    {% endfor %}
+                                </diV>
+                                <div class="tab-pane fade resteUsers">
+                                    {% for index in range(df_resteGraphAnomalie|length) %}
+                                    <b>{{ df_resteGraphAnomalie.index[index] }}:</b> 
+                                    <span style="float: right; padding-left: 25px;">{{ df_resteGraphAnomalie[index] }} utilisateur(s)</span><br>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xxl-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                <i class="fa-solid fa-ranking-star"></i>
+                                    Top 10 mails / réunions (Pôle Formation)
+                                </div>
+                                <div class="card-body" style="display: flex">
+                                    <div class="bar-chart-wrapper">
+                                        <div class="tab-pane fade show active apprenantUsers">
+                                            <canvas id="apprenantTop10PoleFormationUtilisateurs"></canvas>
+                                        </div>
+                                        <div class="tab-pane fade formateurUsers">
+                                            <canvas id="formateurTop10PoleFormationUtilisateurs"></canvas>
+                                        </diV>
+                                        <div class="tab-pane fade resteUsers">
+                                            <canvas id="resteTop10PoleFormationUtilisateurs"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                <i class="fa-solid fa-ranking-star"></i>
+                                    Top 10 mails / réunions (ITII Normandie)
+                                </div>
+                                <div class="card-body" style="display: flex">
+                                    <div class="bar-chart-wrapper">
+                                        <div class="tab-pane fade show active apprenantUsers">
+                                            <canvas id="apprenantTop10ITIIUtilisateurs"></canvas>
+                                        </div>
+                                        <div class="tab-pane fade formateurUsers">
+                                            <canvas id="formateurTop10ITIIUtilisateurs"></canvas>
+                                        </diV>
+                                        <div class="tab-pane fade resteUsers">
+                                            <canvas id="resteTop10ITIIUtilisateurs"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

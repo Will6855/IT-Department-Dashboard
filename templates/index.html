@@ -1,0 +1,860 @@
+{% extends 'base.html' %}
+
+{% block javascript %}
+    <script>
+      DEFAULT_COLORS = [
+                          "#f38b4a",
+                          "#56d798",
+                          "#ff8397",
+                          "#6970d5",
+                          "#d5d569",
+                          "#d56969",
+                          "#69d1d5" 
+                         ]
+        //["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#7FDBFF", "#B10DC9", "#FFDC00", "#001f3f", "#39CCCC", "#01FF70", "#85144b", "#F012BE", "#3D9970", "#111111", "#AAAAAA"]
+      //
+
+      var getTotal = function(doughnutChart) {
+        var sum = doughnutChart.config.data.datasets[0].data.reduce((a, b) => a + b, 0);
+        return sum;
+      }
+
+      //#onglet Groupes
+        var ctx = document.getElementById("groupesXproprio");
+        var groupesXproprio = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: groupesXproprio_labels,
+              datasets: [
+                {
+                  data: groupesXproprio_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                  display: true,
+                  backgroundColor: '#ccc',
+                  borderRadius: 3,
+                  font: {
+                    color: 'red',
+                    weight: 'bold',
+                  },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("anomalie");
+        var anomalie = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: anomalie_labels,
+              datasets: [
+                {
+                  data: anomalie_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("apprenantGraphAnomalie");
+        var apprenantGraphAnomalie = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: apprenantGraphAnomalie_date,
+              datasets: [
+                {
+                  data: apprenantGraphAnomalie_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("formateurGraphAnomalie");
+        var formateurGraphAnomalie = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: formateurGraphAnomalie_date,
+              datasets: [
+                {
+                  data: formateurGraphAnomalie_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("resteGraphAnomalie");
+        var resteGraphAnomalie = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: resteGraphAnomalie_date,
+              datasets: [
+                {
+                  data: resteGraphAnomalie_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("apprenantTop10PoleFormation");
+        ctx.height=300
+        var apprenantTop10PoleFormation = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: apprenantTop10PoleFormation_names,
+            datasets: [{
+              label: "Nombre de Groupes",
+              data: apprenantTop10PoleFormation_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("formateurTop10PoleFormation");
+        ctx.height=300
+        var formateurTop10PoleFormation = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: formateurTop10PoleFormation_names,
+            datasets: [{
+              label: "Nombre de Groupes",
+              data: formateurTop10PoleFormation_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("resteTop10PoleFormation");
+        ctx.height=300
+        var resteTop10PoleFormation = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: resteTop10PoleFormation_names,
+            datasets: [{
+              label: "Nombre de Groupes",
+              data: resteTop10PoleFormation_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+
+        var ctx = document.getElementById("apprenantTop10ITII");
+        ctx.height=300
+        var apprenantTop10ITII = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: apprenantTop10ITII_names,
+            datasets: [{
+              label: "Nombre de Groupes",
+              data: apprenantTop10ITII_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("formateurTop10ITII");
+        ctx.height=300
+        var formateurTop10ITII = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: formateurTop10ITII_names,
+            datasets: [{
+              label: "Nombre de Groupes",
+              data: formateurTop10ITII_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("resteTop10ITII");
+        ctx.height=300
+        var resteTop10ITII = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: resteTop10ITII_names,
+            datasets: [{
+              label: "Nombre de Groupes",
+              data: resteTop10ITII_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+      //#endonglet
+
+      //#onglet Utilisateurs
+        var ctx = document.getElementById("utilisateursXjob");
+        var utilisateursXjob = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: utilisateursXjob_labels,
+              datasets: [
+                {
+                  data: utilisateursXjob_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                  display: true,
+                  backgroundColor: '#ccc',
+                  borderRadius: 3,
+                  font: {
+                    color: 'red',
+                    weight: 'bold',
+                  },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("anomalieUtilisateurs");
+        var anomalieUtilisateurs = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: anomalieUtilisateurs_labels,
+              datasets: [
+                {
+                  data: anomalieUtilisateurs_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("apprenantGraphAnomalieUtilisateurs");
+        var apprenantGraphAnomalieUtilisateurs = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: apprenantGraphAnomalieUtilisateurs_date,
+              datasets: [
+                {
+                  data: apprenantGraphAnomalieUtilisateurs_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("formateurGraphAnomalieUtilisateurs");
+        var formateurGraphAnomalieUtilisateurs = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: formateurGraphAnomalieUtilisateurs_date,
+              datasets: [
+                {
+                  data: formateurGraphAnomalieUtilisateurs_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("resteGraphAnomalieUtilisateurs");
+        var resteGraphAnomalieUtilisateurs = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: resteGraphAnomalieUtilisateurs_date,
+              datasets: [
+                {
+                  data: resteGraphAnomalieUtilisateurs_counts,
+                  backgroundColor: DEFAULT_COLORS, 
+                },
+              ],
+            },
+            plugins: [ChartDataLabels, DoughnutLabel],
+            options: {
+              plugins: {
+                legend: {
+                    display: false
+                },
+                datalabels: {
+                    display: true,
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                      color: 'red',
+                      weight: 'bold',
+                    },
+                },
+                doughnutlabel: {
+                  labels: [
+                    {
+                      text: getTotal,
+                      font: {
+                        size: 20,
+                        weight: 'bold',
+                      },
+                    },
+                    {
+                      text: 'Total',
+                    },
+                  ],
+                },
+              },
+            },
+        });
+
+        var ctx = document.getElementById("apprenantTop10PoleFormationUtilisateurs");
+        ctx.height=300
+        var apprenantTop10PoleFormationUtilisateurs = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: apprenantTop10PoleFormationUtilisateurs_names,
+            datasets: [{
+              label: "Nombre de Mails",
+              data: apprenantTop10PoleFormationUtilisateurs_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("formateurTop10PoleFormationUtilisateurs");
+        ctx.height=300
+        var formateurTop10PoleFormationUtilisateurs = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: formateurTop10PoleFormationUtilisateurs_names,
+            datasets: [{
+              label: "Nombre de Mails",
+              data: formateurTop10PoleFormationUtilisateurs_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("resteTop10PoleFormationUtilisateurs");
+        ctx.height=300
+        var resteTop10PoleFormationUtilisateurs = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: resteTop10PoleFormationUtilisateurs_names,
+            datasets: [{
+              label: "Nombre de Mails",
+              data: resteTop10PoleFormationUtilisateurs_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+
+        var ctx = document.getElementById("apprenantTop10ITIIUtilisateurs");
+        ctx.height=300
+        var apprenantTop10ITIIUtilisateurs = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: apprenantTop10ITIIUtilisateurs_names,
+            datasets: [{
+              label: "Nombre de Mails",
+              data: apprenantTop10ITIIUtilisateurs_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("formateurTop10ITIIUtilisateurs");
+        ctx.height=300
+        var formateurTop10ITIIUtilisateurs = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: formateurTop10ITIIUtilisateurs_names,
+            datasets: [{
+              label: "Nombre de Mails",
+              data: formateurTop10ITIIUtilisateurs_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+        var ctx = document.getElementById("resteTop10ITIIUtilisateurs");
+        ctx.height=300
+        var resteTop10ITIIUtilisateurs = new Chart(ctx, {
+          type: 'bar',
+          
+          data: {
+            labels: resteTop10ITIIUtilisateurs_names,
+            datasets: [{
+              label: "Nombre de Mails",
+              data: resteTop10ITIIUtilisateurs_counts,
+              backgroundColor: '#007bff',
+            }],
+          },
+          options: {
+            indexAxis: 'y',
+          }
+        });
+      //#endonglet
+
+      //#onglet SI
+        moment.locale('fr-FR');
+
+        var data = {
+            datasets: [
+            {% for index in range(df_datasets_absences|length) %}
+                {
+                    categoryPercentage: 1,
+                    barPercentage: 1,
+                    backgroundColor: DEFAULT_COLORS,
+                    // backgroundColor: DEFAULT_COLORS[{{ loop.index0 }}],
+                    data: {{ df_datasets_absences.loc[index].tolist() }},
+                    label: "Absence"
+                },
+            {% endfor %}
+            ],
+            labels: ["MFL", "IEL", "PEL", "LCL", "KLE"]
+        };
+        var options = {
+            indexAxis: "y",
+            plugins: {
+                zoom: {
+                    zoomLevel: 10,
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                            modifierKey: 'ctrl',
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'x',
+                    },
+                    pan: {
+                        enabled: true,
+                        mode: 'x',
+                    },
+                    limits: {
+                        x: {min: 1640995200000, max: 2524608000000} // De janvier 2022 à janvier 2050
+                    },
+                },
+                annotation: {
+                    annotations: [
+                        {
+                            type: "line",
+                            xMin: Date.now(),
+                            xMax: Date.now(),
+                            label: {
+                                content: new Date().toLocaleDateString("fr"),
+                                display: true,
+                                position: "center",
+                                yAdjust: -24,
+                                font: {
+                                size: 10
+                                }
+                            }
+                        },
+                    ]
+                },
+                datalabels: {
+                    display: true,
+                    // anchor: 'start',
+                    // align: 'right',
+                    backgroundColor: '#ccc',
+                    borderRadius: 3,
+                    font: {
+                        color: 'red',
+                        weight: 'bold',
+                    },
+                    formatter: function(value, context) {
+                        if (Math.ceil((new Date(value[1]).getTime() - new Date(value[0]).getTime()) / 86400000) - 1 === 0) {
+                        return Math.ceil((new Date(value[1]).getTime() - new Date(value[0]).getTime()) / 86400000) + " jour";
+                        } else {
+                        return Math.ceil((new Date(value[1]).getTime() - new Date(value[0]).getTime()) / 86400000) + " jours";
+                        }
+                    },
+                },
+                legend: {
+                    display: false,
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem, data, value) {
+                            if (Math.ceil((new Date(tooltipItem.raw[1]).getTime() - new Date(tooltipItem.raw[0]).getTime()) / 86400000) - 1 === 0) {
+                            return "Le " + new Date(tooltipItem.raw[0]).toLocaleDateString("fr");
+                            } else {
+                            return "Du " + new Date(tooltipItem.raw[0]).toLocaleDateString("fr") + " au " + new Date(tooltipItem.raw[1] - 24*60*60*1000).toLocaleDateString("fr") + " (inclus)";
+                            }
+                        }
+                    },
+                },
+            },
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: "time",
+                    time: {
+                        displayFormats: {
+                            month: 'MMM YYYY',
+                            week: 'MMM YYYY',
+                            day: 'DD MMM YYYY',
+                            hour: 'DD/MM/YY HH:mm',
+                            minute: 'DD/MM/YY HH:mm',
+                            second: 'DD/MM/YY HH:mm:ss',
+                            millisecond: 'DD/MM/YY HH:mm:ss',
+                        },
+                    },
+                    stacked: false,
+                    grid: {
+                        display: false,
+                    },
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 30,
+                    },
+                    min: Date.now() - 24*60*60*1000*30*6,
+                    max: Date.now() + 24*60*60*1000*30*6,
+                },
+                y: {
+                    stacked: true
+                }
+            }
+        };
+        var type = "bar";
+        
+        var ctx = document.getElementById("graphAbsences");
+        ctx.height= 50;
+        var graphAbsences = new Chart(ctx, {plugins: [ChartDataLabels, 'chartjs-plugin-annotation'], options, data, type});
+      //#endonglet
+
+
+      // Makes Inner Tabs Works
+      $('#{{ tab }}')
+        .addClass('active show')
+        .siblings('.tab-pane.active')
+        .removeClass('active show')
+      $('#tab-{{ tab }}')
+        .addClass('active show')
+        .siblings('.nav-link.active')
+        .removeClass('active show')
+    </script>
+{% endblock %}
+
+{% block content %}
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Tableau de Bord</h1>
+                        
+                        <ul class="nav nav-tabs" id="tab" role="tablist">
+                          <li class="nav-item">
+                              <a class="nav-link" id="tab-groupes" data-id="groupes" data-bs-toggle="tab" href="#groupes" data-bs-target="#groupes">Groupes Actifs</a>
+                          </li>
+                          <li class="nav-item">
+                              <a class="nav-link" id="tab-utilisateurs" data-id="utilisateurs" data-bs-toggle="tab" href="#utilisateurs" data-bs-target="#utilisateurs">Utilisateurs</a>
+                          </li>
+                          <li class="nav-item">
+                              <a class="nav-link" id="tab-si" data-id="si" data-bs-toggle="tab" href="#si" data-bs-target="#si">SI</a>
+                          </li>
+                        </ul>
+
+                        <div class="card mb-4">
+                          <div class="card-body">
+                            <div class="tab-pane fade" id="groupes">
+                              {% include 'page_groupes.html' %}
+                            </div>
+                            <div class="tab-pane fade" id="utilisateurs">
+                              {% include 'page_utilisateurs.html' %}
+                            </div>
+                            <div class="tab-pane fade" id="si">
+                              {% include 'page_si.html' %}
+                            </div>
+                          </div>
+                        </div>
+
+                    </div>
+                </main>
+{% endblock %}

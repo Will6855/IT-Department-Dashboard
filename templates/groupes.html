@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+
+{# region Calcul de variable #}
+  {% set df_filtered_data = df_group_data[df_group_data['Is Deleted'] == False] %}
+  {% set df_filtered_data = df_filtered_data.assign(Last_Activity_Year=df_filtered_data['Last Activity Date'].str.slice(stop=4)) %}
+  {% set df_ActiveGroupGraphYear = df_filtered_data.groupby('Last_Activity_Year').size() %}
+{# endregion #}
+
+{% block variable %}
+        <script>
+            var ActiveGroupGraphYear_counts_180D = {{ df_ActiveGroupGraphYear.tolist()|safe }};
+            var ActiveGroupGraphYear_date_180D = {{ df_ActiveGroupGraphYear.index.tolist()|safe }};
+        </script>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        var ctx = document.getElementById("treemap");
+        ctx.height = 300;
+        var treemap = new Chart(ctx, {
+          type: 'treemap',
+          
+          data: {
+            labels: ActiveGroupGraphYear_date_180D,
+            datasets: [{
+              label: "Groupes",
+              tree: ActiveGroupGraphYear_counts_180D,
+              backgroundColor: '#007bff',
+              labels: {
+                display: true,
+                color: '#fff',
+                formatter: (ctx) => {
+                  var index = ctx.dataset.tree.findIndex((value) => value === ctx.raw._data);
+                  if (ActiveGroupGraphYear_date_180D[index] == ""){
+                    return "(Vide)"
+                  } else {
+                    return ActiveGroupGraphYear_date_180D[index];
+                  }
+                }
+              }
+            }],
+          },
+        });
+
+        // DataTables and Filters
+        window.addEventListener('DOMContentLoaded', event => {
+          $(document).ready(function() {
+            $('#tableauGroupes tfoot th').each(function () {
+                var title = $(this).text();
+                $(this).html('<input style="width: 100%" type="text" placeholder="' + title + '" />');
+            });
+    
+            var tableauGroupes = $('#tableauGroupes').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
+                },
+                lengthMenu: [5, 10, 20, 50, 100, 200, 500],
+                iDisplayLength: 10,
+                order: [[5, 'asc'], [4, 'desc']],
+                dom: 'lpftrip',
+                initComplete: function () {
+                    // Apply the search
+                    this.api()
+                        .columns()
+                        .every(function () {
+                            var that = this;
+         
+                            $('input', this.footer()).on('keyup change clear', function () {
+                                if (that.search() !== this.value) {
+                                    that.search(this.value).draw();
+                                }
+                            });
+                        });
+                },
+            });
+    
+    
+            function removeFilters() {
+                $('#tableauGroupes tfoot input').val('').change();
+                var elements = document.getElementsByClassName("active-filter");
+                for (var i = 0; i < elements.length; i++) {
+                    elements[i].classList.remove("active-filter");
+                }
+            }
+    
+            $('#sansProprio').on('click', function () {
+                var parentElement = document.getElementById("sansProprio").parentElement
+                if (parentElement.classList.contains("active-filter")) {
+                    parentElement.classList.remove("active-filter");
+                    tableauGroupes.column(1).search('').draw();
+                } else {
+                    parentElement.classList.add("active-filter");
+                    tableauGroupes.column(1).search("^$", true, true).draw();
+                }
+            })
+            $('#sansMembres').on('click', function () {
+                var parentElement = document.getElementById("sansMembres").parentElement
+                if (parentElement.classList.contains("active-filter")) {
+                    parentElement.classList.remove("active-filter");
+                    tableauGroupes.column(5).search('').draw();
+                } else {
+                    parentElement.classList.add("active-filter");
+                    tableauGroupes.column(5).search("^0$", true, true).draw();
+                }
+            })
+            $('#sansAct').on('click', function () {
+                var parentElement = document.getElementById("sansAct").parentElement
+                if (parentElement.classList.contains("active-filter")) {
+                    parentElement.classList.remove("active-filter");
+                    tableauGroupes.column(6).search('').draw();
+                } else {
+                    parentElement.classList.add("active-filter");
+                    tableauGroupes.column(6).search("^$", true, true).draw();
+                }
+            })
+            
+            $('#removeFilters').on('click', function () {
+                removeFilters();
+            })
+          });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Groupes Actifs</h1>
+                        <a href="/groupUpdate" class="reloadButton btn btn-outline-dark" ><i class="fa-solid fa-rotate-right"></i></a>
+                        Dernière MàJ: {{ lastUpdate }}
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+                            <li class="breadcrumb-item active">Groupes Actifs</li>
+                        </ol>
+
+
+                        <div class="row">
+                          <div class="col-xl-8">
+                            <div class="row">
+                              <div class="col-xl-3">
+                                  <div class="card mb-4">
+                                      <div class="card-header">
+                                          <i class="fa-solid fa-user-group"></i>
+                                          Nombre total de groupes actifs
+                                      </div>
+                                      <div class="card-body center">
+                                          {{ df_group_data[df_group_data['Is Deleted'] == False] | length }}
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="col-xl-3">
+                                  <div class="card mb-4">
+                                      <div class="card-header">
+                                          <i class="fa-solid fa-user-group"></i>
+                                          Dont utilisant Teams
+                                      </div>
+                                      <div class="card-body center">
+                                          {{ df_group_data.query("(resourceProvisioningOptions.explode() == 'Team') and `Is Deleted` == False") | length }}
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="col-xl-3">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-user-group"></i>
+                                        Dont Propriétaire Formateur
+                                    </div>
+                                    <div class="card-body center">
+                                        {{ df_group_data.query("`jobTitle`.str.startswith('Format') and `Is Deleted` == False") | length }}
+                                    </div>
+                                  </div>
+                              </div>
+                              <div class="col-xl-3">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fa-solid fa-user-group"></i>
+                                        Dont Propriétaire Apprenant
+                                    </div>
+                                    <div class="card-body center">
+                                        {{ df_group_data.query("`jobTitle`.str.startswith('Appren') and `Is Deleted` == False") | length }}
+                                    </div>
+                                  </div>
+                              </div>
+                            </div>
+
+                            <div class="card mb-4">
+                              <div class="card-header">
+                              <i class="fa-solid fa-filter"></i>
+                              Filtres d'Anomalie
+                              </div>
+                              <div class="card-body row">
+                                <div class="col-xl-3 vertical-center">
+                                  <div class="card mb-4">
+                                    <a id="sansProprio" type="button">
+                                      <div class="card-header">
+                                          <i class="fa-solid fa-circle-exclamation"></i>
+                                          Groupes sans Propriétaire
+                                      </div>
+                                      <div class="card-body center">
+                                        {{ df_group_data.query("`displayName` == '' and `Is Deleted` == False")|length }}
+                                        <div class="animated-progress progress-bar">
+                                          <span data-progress="{{ 100 -(df_group_data.query("`displayName` == '' and `Is Deleted` == False")|length / df_group_data.query("`Is Deleted` == False")|length * 100)|round(1) }}"></span>
+                                        </div>
+                                      </div>
+                                    </a>
+                                  </div>
+                                </div>
+                                <div class="col-xl-3 vertical-center">
+                                  <div class="card mb-4">
+                                    <a id="sansMembres" type="button">
+                                      <div class="card-header">
+                                          <i class="fa-solid fa-circle-exclamation"></i>
+                                          Groupes sans Membre
+                                      </div>
+                                      <div class="card-body center">
+                                        {{ df_group_data.query("`Member Count` == 0 and `Is Deleted` == False")|length }}
+                                        <div class="animated-progress progress-bar">
+                                          <span data-progress="{{ 100 -(df_group_data.query("`Member Count` == 0 and `Is Deleted` == False")|length / df_group_data.query("`Is Deleted` == False")|length * 100)|round(1) }}"></span>
+                                        </div>
+                                      </div>
+                                    </a>
+                                  </div>
+                                </div>
+                                <div class="col-xl-3 vertical-center">
+                                  <div class="card mb-4">
+                                    <a id="sansAct" type="button">
+                                      <div class="card-header">
+                                          <i class="fa-solid fa-circle-exclamation"></i>
+                                          Groupes sans Activité
+                                      </div>
+                                      <div class="card-body center">
+                                        {{ df_group_data.query("`Last Activity Date` == '' and `Is Deleted` == False")|length }}
+                                        <div class="animated-progress progress-bar">
+                                          <span data-progress="{{ 100 -(df_group_data.query("`Last Activity Date` == '' and `Is Deleted` == False")|length / df_group_data.query("`Is Deleted` == False")|length * 100)|round(1) }}"></span>
+                                        </div>
+                                      </div>
+                                    </a>
+                                  </div>
+                                </div>
+                                <div class="col-xl-3 vertical-center">
+                                  <div class="card mb-4">
+                                    <a id="removeFilters" type="button">
+                                      <div class="card-body center">
+                                          <i class="fa-solid fa-filter-circle-xmark"></i>
+                                          Retirer les filtres
+                                      </div>
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="row">
+                              <div class="col-xl-12">
+                                  <div class="card mb-4">
+                                      <div class="card-header">
+                                          <i class="fas fa-table me-1"></i>
+                                          Groupes Actifs
+                                      </div>
+                                      <div class="card-body">
+                                          Rapports du {{ df_group_data['Report Refresh Date'][0]|formatdatetime(actual_format="%Y-%m-%d", format="%d/%m/%Y") }}
+                                          <div class="table-responsive">
+                                              <table id="tableauGroupes" class="table table-bordered table-striped display">
+                                                  <thead>
+                                                      <tr>
+                                                          <th>Nom du groupe</th>
+                                                          <th>Nom / Prénom Propriétaire</th>
+                                                          <th>Fonction Propriétaire</th>
+                                                          <th>Service Propriétaire</th>
+                                                          <th>Mail Propriétaire</th>
+                                                          <th>Nombre de membres</th>
+                                                          <th>Dernière Activité</th>
+                                                          <th>Date de Création</th>
+                                                      </tr>
+                                                  </thead>
+                                                  <tfoot>
+                                                      <tr>
+                                                          <th>Nom du groupe</th>
+                                                          <th>Nom / Prénom Propriétaire</th>
+                                                          <th>Fonction Propriétaire</th>
+                                                          <th>Service Propriétaire</th>
+                                                          <th>Mail Propriétaire</th>
+                                                          <th>Nombre de membres</th>
+                                                          <th>Dernière Activité</th>
+                                                          <th>Date de Création</th>
+                                                      </tr>
+                                                  </tfoot>
+                                                  <tbody>
+
+                                                  {% set ActiveGroup_data = df_group_data[df_group_data['Is Deleted'] == False].reset_index(drop=True) %}
+
+                                                  {% for group in range(ActiveGroup_data | length) %}
+                                                      <tr>
+                                                          <td>{{ ActiveGroup_data['Group Display Name'][group] }}</td>
+                                                          <td>{{ ActiveGroup_data['displayName'][group] }}</td>
+                                                          <td>{{ ActiveGroup_data['jobTitle'][group] }}</td>
+                                                          <td>{{ ActiveGroup_data['department'][group] }}</td>
+                                                          <td>{{ ActiveGroup_data['mail'][group] | urlize }}</td>
+                                                          <td>{{ ActiveGroup_data['Member Count'][group] }}</td>
+                                                          <td data-order="{{ ActiveGroup_data['Last Activity Date'][group] }}">{{ ActiveGroup_data['Last Activity Date'][group]|formatdatetime(actual_format='%Y-%m-%d', format='%d/%m/%Y') if ActiveGroup_data['Last Activity Date'][group]|length }}</td>
+                                                          <td data-order="{{ ActiveGroup_data['createdDateTime'][group] }}">{{ ActiveGroup_data['createdDateTime'][group]|formatdatetime(format='%d/%m/%Y') }}</td>
+                                                      </tr>
+                                                  {% endfor %}
+
+                                                  </tbody>
+                                              </table>
+                                          </div>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+                          </div>
+
+                          
+                          <div class="col-xl-4">
+                            <div class="card mb-4">
+                              <div class="card-header">
+                                  <i class="fa-solid fa-user-group"></i>
+                                  Activité des groupes actifs
+                              </div>
+                              <div class="card-body center">
+                                  <canvas id="treemap"></canvas>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+
+
+
+                        
+                    </div>
+                </main>
+{% endblock content %}

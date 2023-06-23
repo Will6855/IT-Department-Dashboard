@@ -1,0 +1,44 @@
+<div class="row">
+    <div class="col-xxl-9 vertical-center">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fa-solid fa-house"></i>
+                Graphique Congés / Absences
+            </div>
+            <div class="card-body">
+                <div class="chart-wrapper">
+                    <canvas id="graphAbsences"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xxl-3">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fa-solid fa-envelope"></i>
+                Top Emails Service Informatique<br>
+                Dernière MàJ: {{mailslastUpdate}}
+            </div>
+            <div class="card-body">
+                <table id="TopEmailsDatatable" class="table table-bordered table-striped display">
+                    <thead>
+                        <tr>
+                            <th>TRG</th>
+                            <th>Nombre de Mails / Réunions</th>
+                            <th>Stockage Utilisé</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index in range(df_mailsSI_data|length) %}
+                            <tr>
+                                <td>{{ df_mailsSI_data['TRG'][index] }}</td>
+                                <td>{{ df_mailsSI_data['Item Count'][index] }}</td>
+                                <td data-order="{{ df_mailsSI_data['Storage Used (Byte)'][index] }}">{{ df_mailsSI_data['Converted Storage'][index] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
