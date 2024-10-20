@@ -1,0 +1,6 @@
+Flask==3.0.3
+hurry==1.1
+ipython==8.12.3
+numpy==1.25.2
+pandas==2.2.3
+Requests==2.32.3
