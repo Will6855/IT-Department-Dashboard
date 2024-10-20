@@ -1,16 +1,31 @@
-# Internship Dashboard Project
+Here’s a simplified version of your dashboard project description, styled like the rotating proxy example:
 
-This repository contains the code and resources for an interactive web app dashboard developed during my internship. The dashboard is designed for use by the IT Department and serves as a powerful tool to streamline various aspects of their work.
+---
+
+# IT Department Dashboard
+
+An interactive web app dashboard built with **Flask**, developed during my internship. This tool helps streamline IT operations and provides an easy way for the team to manage data and track key metrics.
 
 ## Features
-- **Interactive Dashboard:** The web app provides an intuitive and interactive dashboard, making it easy for the Service Informatique team to access and visualize critical data.
 
-- **Data Management:** It includes features for data input, storage, and retrieval, enabling the team to manage information efficiently.
+- **Microsoft Graph API Integration**: Access and manage data from Microsoft services like Outlook and Teams.
+- **Absence & Metrics Tracking**: Keep track of staff absences and monitor other performance metrics.
+- **Customizable Dashboard**: Tailor the layout and features to suit your department’s specific needs.
+- **Data Management**: Input, store, and retrieve data easily.
+- **User-Friendly Interface**: Simple to use for team members of any technical skill level.
 
-- **Customization:** The dashboard is highly customizable, allowing the IT department to tailor it to their specific needs and preferences.
+## Installation
 
-- **User-Friendly:** The user interface is designed to be user-friendly, ensuring that team members can navigate and use the dashboard with ease.
+Clone the repository and install the required dependencies:
 
-- **Built with Flask:** The project is built using Flask, a Python web framework, ensuring robust functionality and scalability.
+```bash
+pip install -r requirements.txt
+```
 
-I hope that this dashboard will be a valuable asset to the IT Department and enhance their productivity.
+## Usage
+
+Run the Flask app:
+
+```bash
+python run.py
+```
