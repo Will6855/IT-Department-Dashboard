@@ -1,7 +1,3 @@
-Here’s a simplified version of your dashboard project description, styled like the rotating proxy example:
-
----
-
 # IT Department Dashboard
 
 An interactive web app dashboard built with **Flask**, developed during my internship. This tool helps streamline IT operations and provides an easy way for the team to manage data and track key metrics.
