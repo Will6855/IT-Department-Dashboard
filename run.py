@@ -5,6 +5,8 @@ import utils
 import datetime
 import os
 
+from waitress import serve
+
 
 token = utils.getToken()
 headers = {'Authorization' : f'Bearer {token}',
@@ -382,6 +384,5 @@ if __name__ == '__main__':
   # app.run(debug=True, host="0.0.0.0", port="5000")
 
   # Production
-  from waitress import serve
   serve(app, host="0.0.0.0", port=80)
   
