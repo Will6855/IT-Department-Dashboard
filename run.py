@@ -27,6 +27,11 @@ def format_datetime(value, actual_format='%Y-%m-%dT%H:%M:%SZ', format="%d %b %Y 
         return ""
     return datetime.datetime.strptime(str(value), actual_format).strftime(format)
 
+@app.before_request
+def before_request():
+    # Ensure connectedUser is always in the session
+    session['connectedUser'] = utils.Users.getConnectedUser()
+
 # Change Values of Remote Working Hours (SI)
 @app.route('/modCompteur', methods=['POST'])
 def modCompteur():
