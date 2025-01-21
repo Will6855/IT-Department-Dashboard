@@ -79,9 +79,9 @@
                     <div class="sb-sidenav-footer" style="display: flex;">
                         <div>
                             <div class="small">Connecté en tant que:</div>
-                            {{ session.get('connectedUser', [None, None])[1] or '' }}
+                            {{ session["connectedUser"][1]}}
                         </div>
-                        <img style="border-radius: 50%; width: 50px; margin-left: auto;" src="{{ session["connectedUser"][0]}}">
+                        <img style="border-radius: 50%; width: 50px; margin-left: auto;" src="{{ session['connectedUser'][0]}}">
                     </div>
                 </nav>
             </div>
