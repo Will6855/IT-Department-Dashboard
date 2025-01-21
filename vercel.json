@@ -15,5 +15,7 @@
         "src": "/(.*)",
         "dest": "run.py"
       }
-    ]
+    ],
+    "installCommand": "pip3 install -r requirements.txt",
+    "buildCommand": "echo 'Build complete'"
 }
