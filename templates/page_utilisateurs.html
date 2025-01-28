@@ -78,52 +78,48 @@ Dernière MàJ: {{ userLastUpdate }}
 <div class="row">
     <div class="col-xxl-6">
         <div class="card mb-4">
-            <div class="card-body">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fa-solid fa-user-group"></i>
-                        Utilisateurs par Fonction
-                    </diV>
-                    <div class="card-body" style="display: flex">
-                        <div class="chart-wrapper">
-                            <canvas id="utilisateursXjob"></canvas>
-                        </div>
-                        <div class="infoGraph">
-                        <div>
-                            <b>Apprenant:</b>
-                            <span style="float: right; padding-left: 25px;">{{ apprenant_sum }} utilisateur(s)</span><br>
-                            <b>Formateur:</b> 
-                            <span style="float: right; padding-left: 25px;">{{ formateur_sum }} utilisateur(s)</span><br>
-                            <b>(Vide):</b>
-                            <span style="float: right; padding-left: 25px;">{{ vide_sum }} utilisateur(s)</span><br>
-                            <b>Reste:</b>
-                            <span style="float: right; padding-left: 25px;">{{ reste_sum }} utilisateur(s)</span>
-                        </div>
-                        </div>
-                    </div>
+            <div class="card-header">
+                <i class="fa-solid fa-user-group"></i>
+                Utilisateurs par Fonction
+            </diV>
+            <div class="card-body" style="display: flex">
+                <div class="chart-wrapper">
+                    <canvas id="utilisateursXjob"></canvas>
                 </div>
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fa-solid fa-circle-exclamation"></i>
-                        Anomalies
-                    </diV>
-                    <div class="card-body" style="display: flex">
-                        <div class="chart-wrapper">
-                            <canvas id="anomalieUtilisateurs"></canvas>
-                        </div>
-                        <div class="infoGraph">
-                        <div>
-                            <b>Sans métier:</b> 
-                            <span style="float: right; padding-left: 25px;">{{ noJob_sum }} utilisateur(s)</span><br>
-                            <b>Sans service:</b> 
-                            <span style="float: right; padding-left: 25px;">{{ noService_sum }} utilisateur(s)</span><br>
-                            <b>Invités sans Groupe:</b> 
-                            <span style="float: right; padding-left: 25px;">{{ inviteSansGroupe_sum }} utilisateur(s)</span><br>
-                            <b>Utilisateurs non-apprenant,<br> non-generique, non-invité sans Société:</b> 
-                            <span style="float: right; padding-left: 25px;">{{ nonApprenNonGenNonInviteSansSociete_sum }} utilisateur(s)</span><br>
-                        </div>
-                        </div>
-                    </div>
+                <div class="infoGraph">
+                <div>
+                    <b>Apprenant:</b>
+                    <span style="float: right; padding-left: 25px;">{{ apprenant_sum }} utilisateur(s)</span><br>
+                    <b>Formateur:</b> 
+                    <span style="float: right; padding-left: 25px;">{{ formateur_sum }} utilisateur(s)</span><br>
+                    <b>(Vide):</b>
+                    <span style="float: right; padding-left: 25px;">{{ vide_sum }} utilisateur(s)</span><br>
+                    <b>Reste:</b>
+                    <span style="float: right; padding-left: 25px;">{{ reste_sum }} utilisateur(s)</span>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                Anomalies
+            </diV>
+            <div class="card-body" style="display: flex">
+                <div class="chart-wrapper">
+                    <canvas id="anomalieUtilisateurs"></canvas>
+                </div>
+                <div class="infoGraph">
+                <div>
+                    <b>Sans métier:</b> 
+                    <span style="float: right; padding-left: 25px;">{{ noJob_sum }} utilisateur(s)</span><br>
+                    <b>Sans service:</b> 
+                    <span style="float: right; padding-left: 25px;">{{ noService_sum }} utilisateur(s)</span><br>
+                    <b>Invités sans Groupe:</b> 
+                    <span style="float: right; padding-left: 25px;">{{ inviteSansGroupe_sum }} utilisateur(s)</span><br>
+                    <b>Utilisateurs non-apprenant,<br> non-generique, non-invité sans Société:</b> 
+                    <span style="float: right; padding-left: 25px;">{{ nonApprenNonGenNonInviteSansSociete_sum }} utilisateur(s)</span><br>
+                </div>
                 </div>
             </div>
         </div>

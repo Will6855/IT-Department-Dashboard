@@ -433,8 +433,8 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-xl-3">
-                                <div class="card mb-4">
+                            <div class="col-xl-3 mb-4">
+                                <div class="card h-100">
                                     <div class="card-header">
                                         <button type="button" style="float: left;" class="modBtn btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modCompteur"><i class="fa-solid fa-gear"></i></button>
                                         <i class="fa-solid fa-house-laptop"></i>
@@ -461,8 +461,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-xl-5">
-                                <div class="card mb-4">
+                            <div class="col-xl-5 mb-4">
+                                <div class="card h-100">
                                     <div class="card-header">
                                         <button type="button" style="float: left;" class="addBtn btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#addAbsences"><i class="fa-solid fa-plus"></i></button>
                                         <i class="fa-solid fa-house"></i>
@@ -502,8 +502,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-xl-4">
-                                <div class="card mb-4">
+                            <div class="col-xl-4 mb-4">
+                                <div class="card h-100">
                                     <div class="card-header">
                                         <i class="fa-solid fa-envelope"></i>
                                         Top Emails Service Informatique<br>
@@ -534,8 +534,8 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-xxl-4">
-                                <div class="card mb-4">
+                            <div class="col-xxl-4 mb-4">
+                                <div class="card h-100">
                                     <div class="card-header">
                                         <button type="button" style="float: left;" class="addBtn btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#addCauserie"><i class="fa-solid fa-plus"></i></button>
                                         <i class="fa-solid fa-house"></i>
@@ -567,8 +567,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-xxl-8">
-                                <div class="card mb-4">
+                            <div class="col-xxl-8 mb-4">
+                                <div class="card h-100">
                                     <div class="card-header">
                                         <i class="fa-solid fa-house"></i>
                                         Graphique Congés / Absences
@@ -583,14 +583,14 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-xxl-12">
-                                <div class="card mb-4">
+                            <div class="col-xxl-12 mb-4">
+                                <div class="card">
                                     <div class="card-header">
                                         <i class="fa-solid fa-house"></i>
                                         Thématique Causeries
-                                        <a style="float: left" class="btn btn-outline-dark" onclick="goToScholarYear('{{ scholar_year }}')">Actuel</a>
-                                        <p id="nbResults" style="float: right">Nombre de résultats: 0</p>
-                                        <input style="float: right" type="text" onkeyup="search(this)" placeholder="Rechercher">
+                                        <a class="btn btn-outline-dark float-start" onclick="goToScholarYear('{{ scholar_year }}')">Actuel</a>
+                                        <p id="nbResults" class="float-end ms-3">Nombre de résultats: 0</p>
+                                        <input class="float-end" type="text" onkeyup="search(this)" placeholder="Rechercher">
                                     </div>
                                     <div class="card-body" id="causeries" style="height: 520px; overflow-y: scroll; scroll-behavior: smooth; scroll-padding-top: 10px;">
                                         {% for i in range(dict_causeries|list|length) %}

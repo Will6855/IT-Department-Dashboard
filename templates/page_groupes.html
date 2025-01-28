@@ -77,50 +77,46 @@
         <div class="row">
             <div class="col-xxl-6">
                 <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fa-solid fa-user-group"></i>
-                                Groupe par Fonction du Propriétaire Principal
-                            </diV>
-                            <div class="card-body" style="display: flex">
-                                <div class="chart-wrapper">
-                                    <canvas id="groupesXproprio"></canvas>
-                                </div>
-                                <div class="infoGraph">
-                                <div>
-                                    <b>Apprenant:</b>
-                                    <span style="float: right; padding-left: 25px;">{{ apprenant_sum }} groupe(s)</span><br>
-                                    <b>Formateur:</b> 
-                                    <span style="float: right; padding-left: 25px;">{{ formateur_sum }} groupe(s)</span><br>
-                                    <b>(Vide):</b>
-                                    <span style="float: right; padding-left: 25px;">{{ vide_sum }} groupe(s)</span><br>
-                                    <b>Reste:</b>
-                                    <span style="float: right; padding-left: 25px;">{{ reste_sum }} groupe(s)</span>
-                                </div>
-                                </div>
-                            </div>
+                    <div class="card-header">
+                        <i class="fa-solid fa-user-group"></i>
+                        Groupe par Fonction du Propriétaire Principal
+                    </diV>
+                    <div class="card-body" style="display: flex">
+                        <div class="chart-wrapper">
+                            <canvas id="groupesXproprio"></canvas>
                         </div>
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <i class="fa-solid fa-circle-exclamation"></i>
-                                Anomalies
-                            </diV>
-                            <div class="card-body" style="display: flex">
-                                <div class="chart-wrapper">
-                                    <canvas id="anomalie"></canvas>
-                                </div>
-                                <div class="infoGraph">
-                                <div>
-                                    <b>Sans propriétaire:</b> 
-                                    <span style="float: right; padding-left: 25px;">{{ noProprio_sum }} groupe(s)</span><br>
-                                    <b>Sans membre:</b> 
-                                    <span style="float: right; padding-left: 25px;">{{ noMembre_sum }} groupe(s)</span><br>
-                                    <b>Sans date d'activité:</b>
-                                    <span style="float: right; padding-left: 25px;">{{ noAct_sum }} groupe(s)</span>
-                                </div>
-                                </div>
-                            </div>
+                        <div class="infoGraph">
+                        <div>
+                            <b>Apprenant:</b>
+                            <span style="float: right; padding-left: 25px;">{{ apprenant_sum }} groupe(s)</span><br>
+                            <b>Formateur:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ formateur_sum }} groupe(s)</span><br>
+                            <b>(Vide):</b>
+                            <span style="float: right; padding-left: 25px;">{{ vide_sum }} groupe(s)</span><br>
+                            <b>Reste:</b>
+                            <span style="float: right; padding-left: 25px;">{{ reste_sum }} groupe(s)</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        Anomalies
+                    </diV>
+                    <div class="card-body" style="display: flex">
+                        <div class="chart-wrapper">
+                            <canvas id="anomalie"></canvas>
+                        </div>
+                        <div class="infoGraph">
+                        <div>
+                            <b>Sans propriétaire:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ noProprio_sum }} groupe(s)</span><br>
+                            <b>Sans membre:</b> 
+                            <span style="float: right; padding-left: 25px;">{{ noMembre_sum }} groupe(s)</span><br>
+                            <b>Sans date d'activité:</b>
+                            <span style="float: right; padding-left: 25px;">{{ noAct_sum }} groupe(s)</span>
+                        </div>
                         </div>
                     </div>
                 </div>

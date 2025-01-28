@@ -137,46 +137,46 @@
                         <div class="row">
                           <div class="col-xl-8">
                             <div class="row">
-                              <div class="col-xl-3">
-                                  <div class="card mb-4">
+                              <div class="col-xl-3 mb-4">
+                                  <div class="card h-100">
                                       <div class="card-header">
                                           <i class="fa-solid fa-user-group"></i>
                                           Nombre total de groupes actifs
                                       </div>
-                                      <div class="card-body center">
+                                      <div class="card-body d-flex align-items-center justify-content-center">
                                           {{ df_group_data[df_group_data['Is Deleted'] == False] | length }}
                                       </div>
                                   </div>
                               </div>
-                              <div class="col-xl-3">
-                                  <div class="card mb-4">
+                              <div class="col-xl-3 mb-4">
+                                  <div class="card h-100">
                                       <div class="card-header">
                                           <i class="fa-solid fa-user-group"></i>
                                           Dont utilisant Teams
                                       </div>
-                                      <div class="card-body center">
+                                      <div class="card-body d-flex align-items-center justify-content-center">
                                           {{ df_group_data.query("(resourceProvisioningOptions.explode() == 'Team') and `Is Deleted` == False") | length }}
                                       </div>
                                   </div>
                               </div>
-                              <div class="col-xl-3">
-                                <div class="card mb-4">
+                              <div class="col-xl-3 mb-4">
+                                <div class="card h-100">
                                     <div class="card-header">
                                         <i class="fa-solid fa-user-group"></i>
                                         Dont Propriétaire Formateur
                                     </div>
-                                    <div class="card-body center">
+                                    <div class="card-body d-flex align-items-center justify-content-center">
                                         {{ df_group_data.query("`jobTitle`.str.startswith('Format') and `Is Deleted` == False") | length }}
                                     </div>
                                   </div>
                               </div>
-                              <div class="col-xl-3">
-                                <div class="card mb-4">
+                              <div class="col-xl-3 mb-4">
+                                <div class="card h-100">
                                     <div class="card-header">
                                         <i class="fa-solid fa-user-group"></i>
                                         Dont Propriétaire Apprenant
                                     </div>
-                                    <div class="card-body center">
+                                    <div class="card-body d-flex align-items-center justify-content-center">
                                         {{ df_group_data.query("`jobTitle`.str.startswith('Appren') and `Is Deleted` == False") | length }}
                                     </div>
                                   </div>
@@ -189,8 +189,8 @@
                               Filtres d'Anomalie
                               </div>
                               <div class="card-body row">
-                                <div class="col-xl-3 vertical-center">
-                                  <div class="card mb-4">
+                                <div class="col-xl-3 mb-4">
+                                  <div class="card h-100">
                                     <a id="sansProprio" type="button">
                                       <div class="card-header">
                                           <i class="fa-solid fa-circle-exclamation"></i>
@@ -205,8 +205,8 @@
                                     </a>
                                   </div>
                                 </div>
-                                <div class="col-xl-3 vertical-center">
-                                  <div class="card mb-4">
+                                <div class="col-xl-3 mb-4">
+                                  <div class="card h-100">
                                     <a id="sansMembres" type="button">
                                       <div class="card-header">
                                           <i class="fa-solid fa-circle-exclamation"></i>
@@ -221,8 +221,8 @@
                                     </a>
                                   </div>
                                 </div>
-                                <div class="col-xl-3 vertical-center">
-                                  <div class="card mb-4">
+                                <div class="col-xl-3 mb-4">
+                                  <div class="card h-100">
                                     <a id="sansAct" type="button">
                                       <div class="card-header">
                                           <i class="fa-solid fa-circle-exclamation"></i>
@@ -237,8 +237,8 @@
                                     </a>
                                   </div>
                                 </div>
-                                <div class="col-xl-3 vertical-center">
-                                  <div class="card mb-4">
+                                <div class="col-xl-3 mb-4 vertical-center">
+                                  <div class="card">
                                     <a id="removeFilters" type="button">
                                       <div class="card-body center">
                                           <i class="fa-solid fa-filter-circle-xmark"></i>
